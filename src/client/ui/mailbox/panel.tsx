@@ -2,8 +2,10 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { GetApiSupermeshSessionidMailboxResponse } from '@/client/apis/index.type'
 import { useAsyncState } from '@reause/core'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useId, useState } from 'react'
-import { getApiSupermeshSessionIdMailbox } from '@/client/apis'
+import { getApiSupermeshSessionIdMailbox, getApiSupermeshSessionRole } from '@/client/apis'
+import { keys } from '@/client/config/query-keys'
 import { useDshContext } from '@/client/hooks/use-dsh-context'
 import { useTranslation } from '@/client/hooks/use-translation'
 
@@ -11,11 +13,17 @@ declare module '@deepseek-ai/dsh-api-session-controller/client' {
   interface SessionReferenceSourceMap { supermeshMailbox: unknown }
 }
 
+/** 事件只是「可能变了」的信号：合并成一次请求，避免流式输出时把 mailbox 打成刷屏。 */
+const REFRESH_DELAY_MS = 250
+
 export function Panel({ sessionId }: Pick<PropsRuntime<'conversation.input.dock'>, 'sessionId'>) {
   const ctx = useDshContext()
   const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(true)
   const listId = useId()
+  const roles = useQuery({ queryKey: keys.sessionRole, queryFn: () => getApiSupermeshSessionRole() })
+  // 只有插件自己管理的会话才有邮箱；其它会话连请求都不该发。
+  const managed = roles.data?.sessions.some(session => session.sessionId === sessionId) === true
   const { state: mailbox, execute, error } = useAsyncState<GetApiSupermeshSessionidMailboxResponse['mailbox'], [AbortSignal]>(async (signal) => {
     try {
       const { mailbox: result } = await getApiSupermeshSessionIdMailbox({ id: sessionId }, { signal })
@@ -30,26 +38,45 @@ export function Panel({ sessionId }: Pick<PropsRuntime<'conversation.input.dock'
 
   // keep:effect Own the existing Session event subscription and cancel mailbox requests on disposal.
   useEffect(() => {
+    if (!managed)
+      return
     const reference = ctx.sessions.retain(sessionId, { source: 'supermeshMailbox' })
     const events = reference.binding.eventSource
-    let request: AbortController
-    const refresh = () => {
-      request?.abort()
-      request = new AbortController()
-      void execute(0, request.signal)
+    const controller = new AbortController()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let running = false
+    let queued = false
+    const refresh = (): void => {
+      if (running) {
+        queued = true
+        return
+      }
+      running = true
+      void execute(0, controller.signal).catch(() => undefined).finally(() => {
+        running = false
+        if (queued && !controller.signal.aborted) {
+          queued = false
+          timer = setTimeout(refresh, REFRESH_DELAY_MS)
+        }
+      })
+    }
+    const schedule = (): void => {
+      timer ??= setTimeout(refresh, REFRESH_DELAY_MS)
     }
     const unsubscribe = events.subscribe(() => {
       const { change } = events.getSnapshot()
       if (change.kind === 'settle-assistant' || change.entries.some(entry => entry.type === 'event'))
-        refresh()
+        schedule()
     })
     refresh()
     return () => {
       unsubscribe()
-      request.abort()
+      if (timer)
+        clearTimeout(timer)
+      controller.abort()
       reference.release()
     }
-  }, [ctx.sessions, sessionId, execute])
+  }, [ctx.sessions, sessionId, execute, managed])
 
   if (error || mailbox?.sessionId !== sessionId || mailbox.pendingCount === 0 || mailbox.messages.length === 0)
     return null
