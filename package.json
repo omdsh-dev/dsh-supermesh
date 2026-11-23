@@ -1,7 +1,7 @@
 {
   "name": "dsh-supermesh",
   "type": "module",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "packageManager": "pnpm@11.15.1",
   "description": "把 GitHub / GitLab 的 issue、PR 与评论变成任务，交给各自 worktree 里的 Worker 改代码、开 PR，再由上级代理验收收尾。",
   "author": "Hairy <wwu710632@gmail.com>",
