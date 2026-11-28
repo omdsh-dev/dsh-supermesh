@@ -270,7 +270,7 @@ var require_dist = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		useRenderCounter
 	});
 }));
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js
 /**
 * The context that `useQueryClient` reads from. `QueryClientProvider` is the normal way to set it.
 */
@@ -4294,7 +4294,7 @@ var QueryClient = class {
 		this.#mutationCache.clear();
 	}
 };
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js
 const IsRestoringContext = react.createContext(false);
 /**
 * If you are using `PersistQueryClientProvider`, you can also use the `useIsRestoring` hook alongside it to
@@ -4304,7 +4304,7 @@ const IsRestoringContext = react.createContext(false);
 */
 const useIsRestoring = () => react.useContext(IsRestoringContext);
 IsRestoringContext.Provider;
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js
 /**
 * Creates the value shared through the boundary's context, which tracks whether a reset was
 * requested.
@@ -4364,7 +4364,7 @@ const QueryErrorResetBoundaryContext = react.createContext(createValue());
 * ```
 */
 const useQueryErrorResetBoundary = () => react.useContext(QueryErrorResetBoundaryContext);
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js
 /**
 * Turns off `retryOnMount` for a query that throws its errors (with `suspense` or `throwOnError`),
 * unless the error boundary has been reset, so a remount doesn't retry the failed query before the
@@ -4400,7 +4400,7 @@ const useClearResetErrorBoundary = (errorResetBoundary) => {
 const getHasError = ({ result, errorResetBoundary, throwOnError, query, suspense }) => {
 	return result.isError && !errorResetBoundary.isReset() && !result.isFetching && query && (suspense && result.data === void 0 || shouldThrowError(throwOnError, [result.error, query]));
 };
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/suspense.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/suspense.js
 /**
 * Raises `staleTime` and a numeric `gcTime` to at least 1000ms when `suspense` is enabled, so a
 * component that remounts after suspending doesn't refetch right away or find the query garbage
@@ -4434,7 +4434,7 @@ const shouldSuspend = (defaultedOptions, result) => defaultedOptions?.suspense &
 const fetchOptimistic = (defaultedOptions, observer, errorResetBoundary) => observer.fetchOptimistic(defaultedOptions).catch(() => {
 	errorResetBoundary.clearReset();
 });
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/useBaseQuery.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/useBaseQuery.js
 /**
 * Base implementation shared by `useQuery`, `useInfiniteQuery`, `useSuspenseQuery`, and
 * `useSuspenseInfiniteQuery`.
@@ -4480,11 +4480,11 @@ function useBaseQuery(options, Observer, queryClient) {
 	})) throw result.error;
 	return !defaultedOptions.notifyOnChangeProps ? observer.trackResult(result) : result;
 }
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/useQuery.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/useQuery.js
 function useQuery(options, queryClient) {
 	return useBaseQuery(options, QueryObserver, queryClient);
 }
-// node_modules/.pnpm/@tanstack+react-query@5.107_304e4b457c1f69aa40b2b8c23f0965b9/node_modules/@tanstack/react-query/build/modern/useMutation.js
+// node_modules/.pnpm/@tanstack+react-query@5.107.1_@types+react@19.3.0_react@18.3.1/node_modules/@tanstack/react-query/build/modern/useMutation.js
 /**
 * Unlike queries, mutations are typically used to create/update/delete data or perform server side-effects.
 * `useMutation` is the hook for that.
@@ -4674,187 +4674,253 @@ function useMutation(options, queryClient) {
 var import_dist = require_dist();
 /** @method get */
 async function getApiSupermeshProject(config) {
-	return (await fetch("/api/supermesh/project", { ...config })).json();
+	const response = await fetch("/api/supermesh/project", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method post */
 async function postApiSupermeshProject(config) {
-	return (await fetch("/api/supermesh/project", {
+	const response = await fetch("/api/supermesh/project", {
 		method: "POST",
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method patch */
 async function patchApiSupermeshProjectId(paths, body, config) {
-	return (await fetch(`/api/supermesh/project/${paths.id}`, {
+	const response = await fetch(`/api/supermesh/project/${paths.id}`, {
 		headers: { "Content-Type": "application/json" },
 		method: "PATCH",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method post */
 async function postApiSupermeshRepository(body, config) {
-	return (await fetch("/api/supermesh/repository", {
+	const response = await fetch("/api/supermesh/repository", {
 		headers: { "Content-Type": "application/json" },
 		method: "POST",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshTicket(query, config) {
 	const querystr = new URLSearchParams(Object.entries(query || {}));
-	return (await fetch(`/api/supermesh/ticket?${querystr}`, { ...config })).json();
+	const response = await fetch(`/api/supermesh/ticket?${querystr}`, { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshTicketCount(config) {
-	return (await fetch("/api/supermesh/ticket/count", { ...config })).json();
+	const response = await fetch("/api/supermesh/ticket/count", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshTicketId(paths, config) {
-	return (await fetch(`/api/supermesh/ticket/${paths.id}`, { ...config })).json();
+	const response = await fetch(`/api/supermesh/ticket/${paths.id}`, { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method patch */
 async function patchApiSupermeshTicketId(paths, body, config) {
-	return (await fetch(`/api/supermesh/ticket/${paths.id}`, {
+	const response = await fetch(`/api/supermesh/ticket/${paths.id}`, {
 		headers: { "Content-Type": "application/json" },
 		method: "PATCH",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method post */
 async function postApiSupermeshAskIdAnswer(paths, body, config) {
-	return (await fetch(`/api/supermesh/ask/${paths.id}/answer`, {
+	const response = await fetch(`/api/supermesh/ask/${paths.id}/answer`, {
 		headers: { "Content-Type": "application/json" },
 		method: "POST",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshNode(config) {
-	return (await fetch("/api/supermesh/node", { ...config })).json();
+	const response = await fetch("/api/supermesh/node", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshEdge(config) {
-	return (await fetch("/api/supermesh/edge", { ...config })).json();
+	const response = await fetch("/api/supermesh/edge", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshGroup(config) {
-	return (await fetch("/api/supermesh/group", { ...config })).json();
+	const response = await fetch("/api/supermesh/group", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshStatus(config) {
-	return (await fetch("/api/supermesh/status", { ...config })).json();
+	const response = await fetch("/api/supermesh/status", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshPending(config) {
-	return (await fetch("/api/supermesh/pending", { ...config })).json();
+	const response = await fetch("/api/supermesh/pending", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshDelivery(config) {
-	return (await fetch("/api/supermesh/delivery", { ...config })).json();
+	const response = await fetch("/api/supermesh/delivery", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshThread(config) {
-	return (await fetch("/api/supermesh/thread", { ...config })).json();
+	const response = await fetch("/api/supermesh/thread", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshTrigger(config) {
-	return (await fetch("/api/supermesh/trigger", { ...config })).json();
+	const response = await fetch("/api/supermesh/trigger", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshTopic(query, config) {
 	const querystr = new URLSearchParams(Object.entries(query || {}));
-	return (await fetch(`/api/supermesh/topic?${querystr}`, { ...config })).json();
+	const response = await fetch(`/api/supermesh/topic?${querystr}`, { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshTopicCount(query, config) {
 	const querystr = new URLSearchParams(Object.entries(query || {}));
-	return (await fetch(`/api/supermesh/topic/count?${querystr}`, { ...config })).json();
+	const response = await fetch(`/api/supermesh/topic/count?${querystr}`, { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshSubscription(config) {
-	return (await fetch("/api/supermesh/subscription", { ...config })).json();
+	const response = await fetch("/api/supermesh/subscription", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshChannel(config) {
-	return (await fetch("/api/supermesh/channel", { ...config })).json();
+	const response = await fetch("/api/supermesh/channel", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method put */
 async function putApiSupermeshChannelIdConfiguration(paths, body, config) {
-	return (await fetch(`/api/supermesh/channel/${paths.id}/configuration`, {
+	const response = await fetch(`/api/supermesh/channel/${paths.id}/configuration`, {
 		headers: { "Content-Type": "application/json" },
 		method: "PUT",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method delete */
 async function deleteApiSupermeshChannelIdCredential(paths, config) {
-	return (await fetch(`/api/supermesh/channel/${paths.id}/credential`, {
+	const response = await fetch(`/api/supermesh/channel/${paths.id}/credential`, {
 		method: "DELETE",
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method post */
 async function postApiSupermeshChannelIdAuthentication(paths, body, config) {
-	return (await fetch(`/api/supermesh/channel/${paths.id}/authentication`, {
+	const response = await fetch(`/api/supermesh/channel/${paths.id}/authentication`, {
 		headers: { "Content-Type": "application/json" },
 		method: "POST",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshChannelIdAuthenticationAuthenticationId(paths, config) {
-	return (await fetch(`/api/supermesh/channel/${paths.id}/authentication/${paths.authenticationId}`, { ...config })).json();
+	const response = await fetch(`/api/supermesh/channel/${paths.id}/authentication/${paths.authenticationId}`, { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshSetting(config) {
-	return (await fetch("/api/supermesh/setting", { ...config })).json();
+	const response = await fetch("/api/supermesh/setting", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method patch */
 async function patchApiSupermeshSetting(body, config) {
-	return (await fetch("/api/supermesh/setting", {
+	const response = await fetch("/api/supermesh/setting", {
 		headers: { "Content-Type": "application/json" },
 		method: "PATCH",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshAgentModel(config) {
-	return (await fetch("/api/supermesh/agent/model", { ...config })).json();
+	const response = await fetch("/api/supermesh/agent/model", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method patch */
 async function patchApiSupermeshAgentModel(body, config) {
-	return (await fetch("/api/supermesh/agent/model", {
+	const response = await fetch("/api/supermesh/agent/model", {
 		headers: { "Content-Type": "application/json" },
 		method: "PATCH",
 		body: JSON.stringify(body),
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshAgentModelCatalog(config) {
-	return (await fetch("/api/supermesh/agent/model/catalog", { ...config })).json();
+	const response = await fetch("/api/supermesh/agent/model/catalog", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method put */
 async function putApiSupermeshSessionMain(config) {
-	return (await fetch("/api/supermesh/session/main", {
+	const response = await fetch("/api/supermesh/session/main", {
 		method: "PUT",
 		...config
-	})).json();
+	});
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshSessionRole(config) {
-	return (await fetch("/api/supermesh/session/role", { ...config })).json();
+	const response = await fetch("/api/supermesh/session/role", { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 /** @method get */
 async function getApiSupermeshSessionIdMailbox(paths, config) {
-	return (await fetch(`/api/supermesh/session/${paths.id}/mailbox`, { ...config })).json();
+	const response = await fetch(`/api/supermesh/session/${paths.id}/mailbox`, { ...config });
+	if (!response.ok) throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 200) || response.statusText}`);
+	return response.json();
 }
 // src/client/client.ts
 const client = new QueryClient({ defaultOptions: { queries: {
@@ -6296,6 +6362,11 @@ const dicts = {
 		settingAdministrators: "管理员登录名",
 		settingAdministratorsHelp: "填写人类管理员的平台登录名，以逗号或空格分隔，最多 100 个。此白名单全渠道共用，只需配置一次；不要填写 bot 账号、显示名称或 URL，也不需要 Token。只有白名单中的人类可以通过新话题或 @bot 评论首次派工；留空阻止新派工，已有任务仍接收人类跟进。",
 		settingAdministratorsInvalid: "请填写有效的平台登录名，不要填写 @、显示名称或 URL；最多 100 个。",
+		settingInferred: "未 @ bot 的消息",
+		settingInferredHelp: "没 @ bot 的 issue 和评论只能是 inferred 候选。只记录：不进流程，只留在触发时间线；只分诊（默认）：进流程做分诊，但建票会被拒绝；允许建票：候选也能开票派工。要开工仍然以人明确 @ bot 最可靠。",
+		settingInferredOff: "只记录",
+		settingInferredObserve: "只分诊",
+		settingInferredAuto: "允许建票",
 		settingGeneralSaveFailed: "通用设置保存失败，请重试。",
 		settingSaveFailed: "设置保存失败，请重试。",
 		settingAddRepository: "新增仓库",
@@ -6321,6 +6392,21 @@ const dicts = {
 		settingOpenSession: "打开会话",
 		settingOpenRepository: "打开仓库",
 		settingEnabledCount: "已启用 {enabled} / {total}",
+		settingCollectionOk: "采集正常 · {time}",
+		settingCollectionFailed: "采集失败：{reasons} · {time}",
+		settingCollectionReasonRepositoryMismatch: "仓库归属校验失败",
+		settingCollectionReasonInvalidHost: "站点地址无效",
+		settingCollectionReasonNotLoggedIn: "Token 无效或未登录",
+		settingCollectionReasonForbidden: "权限不足",
+		settingCollectionReasonNotFound: "仓库不存在或不可见",
+		settingCollectionReasonRateLimited: "触发限流",
+		settingCollectionReasonChannelDisabled: "渠道已关闭",
+		settingCollectionReasonUnknownRepository: "远程仓库无法识别",
+		settingCollectionReasonAccountMismatch: "机器人账号不匹配",
+		settingCollectionReasonIdentityChanged: "环境身份已变化",
+		settingCollectionReasonInvalidResponse: "响应格式异常",
+		settingCollectionReasonRemoteRejected: "远端拒绝请求",
+		settingCollectionReasonTransport: "网络或传输失败",
 		settingRefresh: "刷新项目列表",
 		settingSearchProjects: "搜索名称或远程仓库",
 		settingLastSynced: "最近刷新",
@@ -6410,8 +6496,12 @@ const dicts = {
 		channelSite: "服务站点",
 		channelSiteDescription: "GitLab 官方站和自建站共用同一个渠道，不额外创建账号。",
 		channelHost: "GitLab 站点",
-		channelHostHelp: "默认使用 gitlab.com；自建实例请填写 HTTPS 站点根地址，不含项目路径。",
-		channelHostInvalid: "请输入有效的 HTTPS 站点地址，不要包含账号、密码、项目路径、查询参数或片段。",
+		channelHostHelp: "默认使用 gitlab.com；自建实例请填写站点根地址（https:// 或纯 http://），不含项目路径。",
+		channelHostInvalid: "请输入有效的站点地址（https:// 或 http://），不要包含账号、密码、项目路径、查询参数或片段。",
+		channelHostInsecure: "纯 HTTP 会以明文传输 Token 与仓库内容，仅建议在可信内网使用。",
+		channelAdministratorsMissing: "未配置管理员：@bot 和新建话题都不会进入流程。",
+		channelAdministratorsConfigure: "去设置管理员",
+		channelLastDropNotAdministrator: "最近丢弃：{actor} 不在管理员名单（{time}）。",
 		channelAccount: "渠道账号",
 		channelAccountDescription: "通过授权登录或 Token 验证账号，保存实际登录身份。",
 		channelCommitName: "Git 提交名称",
@@ -6515,7 +6605,7 @@ const dicts = {
 		overviewTaskApi: "校对 API 响应规范",
 		overviewStatusReview: "待审核",
 		overviewStatusRunning: "运行中",
-		overviewStatusWaiting: "等待触发",
+		ticketStatusIdle: "等待触发",
 		overviewStatusIntervention: "异常",
 		overviewSource: "触发来源",
 		overviewDuration: "耗时",
@@ -6716,6 +6806,11 @@ const dicts = {
 		settingAdministrators: "Administrator usernames",
 		settingAdministratorsHelp: "Enter human administrator platform usernames separated by commas or spaces, up to 100. Configure this shared allowlist once for all channels. Do not enter bot accounts, display names, or URLs; no token is required. Only listed humans can start tasks through new topics or @bot comments. An empty list blocks new tasks; existing tasks still receive human follow-ups.",
 		settingAdministratorsInvalid: "Enter valid platform usernames, not @mentions, display names, or URLs; up to 100.",
+		settingInferred: "Messages that do not mention the bot",
+		settingInferredHelp: "An issue or comment that does not mention the bot is only an inferred candidate. Record only: it never enters the flow and stays on the trigger timeline. Triage only (default): it enters for triage, but ticket creation is refused. Allow tickets: a candidate may start work. Mentioning the bot remains the reliable way to start work.",
+		settingInferredOff: "Record only",
+		settingInferredObserve: "Triage only",
+		settingInferredAuto: "Allow tickets",
 		settingGeneralSaveFailed: "Could not save general settings. Try again.",
 		settingSaveFailed: "Could not save settings. Try again.",
 		settingAddRepository: "Add repository",
@@ -6741,6 +6836,21 @@ const dicts = {
 		settingOpenSession: "Open session",
 		settingOpenRepository: "Open repository",
 		settingEnabledCount: "{enabled} / {total} enabled",
+		settingCollectionOk: "Collecting normally · {time}",
+		settingCollectionFailed: "Collection failed: {reasons} · {time}",
+		settingCollectionReasonRepositoryMismatch: "repository ownership check failed",
+		settingCollectionReasonInvalidHost: "invalid host URL",
+		settingCollectionReasonNotLoggedIn: "token invalid or not signed in",
+		settingCollectionReasonForbidden: "permission denied",
+		settingCollectionReasonNotFound: "repository missing or not visible",
+		settingCollectionReasonRateLimited: "rate limited",
+		settingCollectionReasonChannelDisabled: "channel disabled",
+		settingCollectionReasonUnknownRepository: "remote repository not recognised",
+		settingCollectionReasonAccountMismatch: "bot account mismatch",
+		settingCollectionReasonIdentityChanged: "environment identity changed",
+		settingCollectionReasonInvalidResponse: "unexpected response",
+		settingCollectionReasonRemoteRejected: "request rejected by the remote",
+		settingCollectionReasonTransport: "network or transport failure",
 		settingRefresh: "Refresh projects",
 		settingSearchProjects: "Search names or remote repositories",
 		settingLastSynced: "Last refreshed",
@@ -6830,8 +6940,12 @@ const dicts = {
 		channelSite: "Service host",
 		channelSiteDescription: "GitLab.com and self-managed instances use the same single channel and account.",
 		channelHost: "GitLab host",
-		channelHostHelp: "Use gitlab.com by default, or enter the HTTPS root URL of a self-managed host without a project path.",
-		channelHostInvalid: "Enter a valid HTTPS host URL without credentials, project paths, query parameters, or fragments.",
+		channelHostHelp: "Use gitlab.com by default, or enter the root URL of a self-managed host (https:// or plain http://) without a project path.",
+		channelHostInvalid: "Enter a valid host URL (https:// or http://) without credentials, project paths, query parameters, or fragments.",
+		channelHostInsecure: "Plain HTTP sends tokens and repository content unencrypted; use it only on a trusted internal network.",
+		channelAdministratorsMissing: "No administrators configured: @bot mentions and new topics never enter the flow.",
+		channelAdministratorsConfigure: "Configure administrators",
+		channelLastDropNotAdministrator: "Last dropped message: {actor} is not in the administrator list ({time}).",
 		channelAccount: "Channel account",
 		channelAccountDescription: "Specify the expected bot identity. The authenticated account must match.",
 		channelCommitName: "Git commit name",
@@ -6935,7 +7049,7 @@ const dicts = {
 		overviewTaskApi: "Review API response specification",
 		overviewStatusReview: "In review",
 		overviewStatusRunning: "Running",
-		overviewStatusWaiting: "Waiting for trigger",
+		ticketStatusIdle: "Waiting for a trigger",
 		overviewStatusIntervention: "Failed",
 		overviewSource: "Source",
 		overviewDuration: "Duration",
@@ -7259,7 +7373,7 @@ function FeishuDetail() {
 	if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
 		t0 = {
 			queryKey: keys.channel,
-			queryFn: _temp$28,
+			queryFn: _temp$29,
 			staleTime: 0,
 			gcTime: 0,
 			refetchOnMount: "always"
@@ -7343,8 +7457,77 @@ function FeishuDetail() {
 function _temp2$18(channel) {
 	return channel.id === "feishu";
 }
-function _temp$28() {
+function _temp$29() {
 	return getApiSupermeshChannel();
+}
+// src/client/pages/channel/detail/components/admission.tsx
+function AdmissionNotice(t0) {
+	const $ = (0, import_dist.c)(12);
+	const { channel } = t0;
+	const { t } = useTranslation();
+	const { go, setSettingSection } = useActions();
+	let t1;
+	if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+		t1 = {
+			queryKey: keys.setting,
+			queryFn: _temp$28
+		};
+		$[0] = t1;
+	} else t1 = $[0];
+	const setting = useQuery(t1);
+	const empty = setting.data !== void 0 && setting.data.administrators.length === 0;
+	const drop = channel?.lastDrop?.reason === "not_administrator" ? channel.lastDrop : null;
+	if (!empty && !drop) return null;
+	let t2;
+	if ($[1] !== empty || $[2] !== go || $[3] !== setSettingSection || $[4] !== t) {
+		t2 = empty && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+			className: "flex flex-wrap items-center justify-between gap-2",
+			children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+				role: "status",
+				children: t("channelAdministratorsMissing")
+			}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+				size: "sm",
+				variant: "outline",
+				onClick: () => {
+					setSettingSection("general");
+					go("setting");
+				},
+				children: t("channelAdministratorsConfigure")
+			})]
+		});
+		$[1] = empty;
+		$[2] = go;
+		$[3] = setSettingSection;
+		$[4] = t;
+		$[5] = t2;
+	} else t2 = $[5];
+	let t3;
+	if ($[6] !== drop || $[7] !== t) {
+		t3 = drop && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+			role: "status",
+			children: t("channelLastDropNotAdministrator", {
+				actor: drop.actor,
+				time: new Date(drop.at).toLocaleString()
+			})
+		});
+		$[6] = drop;
+		$[7] = t;
+		$[8] = t3;
+	} else t3 = $[8];
+	let t4;
+	if ($[9] !== t2 || $[10] !== t3) {
+		t4 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+			className: "m-0 flex flex-col gap-2 rounded-xl border border-(--dsw-alias-state-error-primary) px-4 py-3 text-xs leading-5 text-(--dsw-alias-state-error-primary)",
+			children: [t2, t3]
+		});
+		$[9] = t2;
+		$[10] = t3;
+		$[11] = t4;
+	} else t4 = $[11];
+	return t4;
+}
+function _temp$28() {
+	return getApiSupermeshSetting();
 }
 // src/client/pages/channel/detail/components/section.tsx
 function Section$1(t0) {
@@ -7745,6 +7928,7 @@ function GithubDetail() {
 			className: "m-0 rounded-xl border border-(--dsw-alias-border-l3) bg-(--dsw-alias-card-fill) px-4 py-3 text-xs leading-5 text-(--dsw-alias-label-secondary)",
 			children: t("channelGithubAvailability")
 		}),
+		/* @__PURE__ */ (0, react_jsx_runtime.jsx)(AdmissionNotice, { channel: channel_0 }),
 		/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 			className: "m-0 text-xs text-(--dsw-alias-label-secondary)",
 			children: t("channelSingleAccount")
@@ -8119,10 +8303,11 @@ function GitlabDetail() {
 	const dirty = normalizeHost(host) !== normalizeHost(channel_0?.host ?? "https://gitlab.com") || commitName.trim() !== (channel_0?.commitName ?? "").trim() || commitEmail.trim() !== (channel_0?.commitEmail ?? "").trim() || Boolean(token.trim());
 	function validateHost() {
 		const url = URL.canParse(host.trim()) ? new URL(host.trim()) : null;
-		const valid = Boolean(url && url.protocol === "https:" && !url.username && !url.password && !url.search && !url.hash && url.pathname === "/");
+		const valid = Boolean(url && (url.protocol === "https:" || url.protocol === "http:") && !url.username && !url.password && !url.search && !url.hash && url.pathname === "/");
 		setHostInvalid(!valid);
 		return valid;
 	}
+	const hostInsecure = URL.canParse(host.trim()) && new URL(host.trim()).protocol === "http:";
 	const busy = saving || deleteConfirming;
 	return /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [
 		/* @__PURE__ */ (0, react_jsx_runtime.jsx)(DetailHeader, {
@@ -8198,6 +8383,7 @@ function GitlabDetail() {
 			className: "m-0 rounded-xl border border-(--dsw-alias-border-l3) bg-(--dsw-alias-card-fill) px-4 py-3 text-xs leading-5 text-(--dsw-alias-label-secondary)",
 			children: t("channelGitlabAvailability")
 		}),
+		/* @__PURE__ */ (0, react_jsx_runtime.jsx)(AdmissionNotice, { channel: channel_0 }),
 		/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 			className: "m-0 text-xs text-(--dsw-alias-label-secondary)",
 			children: t("channelSingleAccount")
@@ -8230,12 +8416,18 @@ function GitlabDetail() {
 								spellCheck: false,
 								autoComplete: "url",
 								"aria-invalid": hostInvalid,
-								"aria-describedby": `${id}-host-help${hostInvalid ? ` ${id}-host-error` : ""}`
+								"aria-describedby": `${id}-host-help${hostInsecure ? ` ${id}-host-warning` : ""}${hostInvalid ? ` ${id}-host-error` : ""}`
 							}),
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 								id: `${id}-host-help`,
 								className: "m-0 text-xs leading-5 text-(--dsw-alias-label-secondary)",
 								children: t("channelHostHelp")
+							}),
+							hostInsecure && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
+								id: `${id}-host-warning`,
+								role: "status",
+								className: "m-0 rounded-lg border border-(--dsw-alias-state-error-primary) px-3 py-2 text-xs leading-5 text-(--dsw-alias-state-error-primary)",
+								children: t("channelHostInsecure")
 							}),
 							hostInvalid && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 								id: `${id}-host-error`,
@@ -8777,7 +8969,7 @@ var require_clsx = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	}
 	module.exports = e, module.exports.clsx = e;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/excludeEventProps.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/excludeEventProps.js
 var require_excludeEventProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.isEventKey = isEventKey;
@@ -8949,7 +9141,7 @@ var require_excludeEventProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return EventKeys.includes(key);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/svgPropertiesNoEvents.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/svgPropertiesNoEvents.js
 var require_svgPropertiesNoEvents = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.isDataAttribute = isDataAttribute;
@@ -9310,7 +9502,7 @@ var require_svgPropertiesNoEvents = /* @__PURE__ */ __commonJSMin(((exports) => 
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/svgPropertiesAndEvents.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/svgPropertiesAndEvents.js
 var require_svgPropertiesAndEvents = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.svgPropertiesAndEvents = svgPropertiesAndEvents;
@@ -9352,7 +9544,7 @@ var require_svgPropertiesAndEvents = /* @__PURE__ */ __commonJSMin(((exports) =>
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/container/Surface.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/container/Surface.js
 var require_Surface = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Surface = void 0;
@@ -9433,7 +9625,7 @@ var require_Surface = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}), /*#__PURE__*/ React.createElement("title", null, title), /*#__PURE__*/ React.createElement("desc", null, desc), children);
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/container/Layer.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/container/Layer.js
 var require_Layer = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Layer = void 0;
@@ -9808,7 +10000,7 @@ var require_get$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_get$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_get$2().get;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/round.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/round.js
 var require_round$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.round = round;
@@ -9835,7 +10027,7 @@ var require_round$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}, "");
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/DataUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/DataUtils.js
 var require_DataUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.findEntryInArray = findEntryInArray;
@@ -10011,7 +10203,7 @@ var require_DataUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	*/
 	function noop() {}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/cartesianViewBoxToTrapezoid.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/cartesianViewBoxToTrapezoid.js
 var require_cartesianViewBoxToTrapezoid = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.cartesianViewBoxToTrapezoid = cartesianViewBoxToTrapezoid;
@@ -10027,7 +10219,7 @@ var require_cartesianViewBoxToTrapezoid = /* @__PURE__ */ __commonJSMin(((export
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/getCartesianPosition.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/getCartesianPosition.js
 var require_getCartesianPosition = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getCartesianPosition = void 0;
@@ -10238,7 +10430,7 @@ var require_getCartesianPosition = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return absolutePositions.includes(position);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/legendPortalContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/legendPortalContext.js
 var require_legendPortalContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useLegendPortal = exports.LegendPortalContext = void 0;
@@ -12845,7 +13037,7 @@ var require_src$8 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_d3_shape = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_src$8();
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Symbols.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Symbols.js
 var require_Symbols = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Symbols = void 0;
@@ -13010,7 +13202,7 @@ var require_Symbols = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.Symbols = Symbols;
 	Symbols.registerSymbol = registerSymbol;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/types.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/types.js
 var require_types = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.isPolarCoordinate = exports.isNonEmptyArray = exports.adaptEventsOfChild = exports.adaptEventHandlers = void 0;
@@ -13271,7 +13463,7 @@ var require_types = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.isNonEmptyArray = isNonEmptyArray;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/resolveDefaultProps.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/resolveDefaultProps.js
 var require_resolveDefaultProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.resolveDefaultProps = resolveDefaultProps;
@@ -13368,7 +13560,7 @@ var require_resolveDefaultProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 *
 * This is useful for creating a type that represents the resolved props of a component with default props.
 */
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/DefaultLegendContent.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/DefaultLegendContent.js
 var require_DefaultLegendContent = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultLegendContentDefaultProps = exports.DefaultLegendContent = void 0;
@@ -14708,7 +14900,7 @@ var require_uniqBy$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_uniqBy$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_uniqBy$2().uniqBy;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/payload/getUniqPayload.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/payload/getUniqPayload.js
 var require_getUniqPayload = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getUniqPayload = getUniqPayload;
@@ -14867,13 +15059,13 @@ var require_with_selector_production = /* @__PURE__ */ __commonJSMin(((exports) 
 var require_with_selector$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_with_selector_production();
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/RechartsReduxContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/RechartsReduxContext.js
 var require_RechartsReduxContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RechartsReduxContext = void 0;
 	exports.RechartsReduxContext = /*#__PURE__*/ (0, require("react").createContext)(null);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/hooks.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/hooks.js
 var require_hooks$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useAppDispatch = void 0;
@@ -15551,7 +15743,7 @@ var require_sortBy$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_sortBy = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_sortBy$1().sortBy;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/legendSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/legendSelectors.js
 var require_legendSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectLegendSize = exports.selectLegendSettings = exports.selectLegendPayload = void 0;
@@ -15571,7 +15763,7 @@ var require_legendSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return itemSorter ? (0, _sortBy.default)(flat, itemSorter) : flat;
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/legendPayloadContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/legendPayloadContext.js
 var require_legendPayloadContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useLegendPayload = useLegendPayload;
@@ -15585,7 +15777,7 @@ var require_legendPayloadContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return (0, _hooks.useAppSelector)(_legendSelectors.selectLegendPayload);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/useElementOffset.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/useElementOffset.js
 var require_useElementOffset = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useElementOffset = useElementOffset;
@@ -16821,7 +17013,7 @@ var init_redux_thunk = __esmMin((() => {
 	thunk = createThunkMiddleware();
 	withExtraArgument = createThunkMiddleware;
 }));
-// node_modules/.pnpm/@reduxjs+toolkit@2.14.0_@ty_75d012ad6312a87b081b449d74c0a5a8/node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs
+// node_modules/.pnpm/@reduxjs+toolkit@2.14.0_@types+react@19.3.0_react-redux@9.3.1_@types+react@19.3.0_react@18.3.1_redux@5.0.1__react@18.3.1/node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs
 var redux_toolkit_modern_exports = /* @__PURE__ */ __exportAll({
 	ReducerType: () => ReducerType,
 	SHOULD_AUTOBATCH: () => SHOULD_AUTOBATCH,
@@ -18493,7 +18685,7 @@ var init_redux_toolkit_modern = __esmMin((() => {
 	emptyObject = {};
 	noopReducer = (state = emptyObject) => state;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/layoutSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/layoutSlice.js
 var require_layoutSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.setScale = exports.setMargin = exports.setLayout = exports.setChartSize = exports.chartLayoutReducer = void 0;
@@ -18538,7 +18730,7 @@ var require_layoutSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.setScale = _chartLayoutSlice$act.setScale;
 	exports.chartLayoutReducer = chartLayoutSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/getSliced.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/getSliced.js
 var require_getSliced = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getSliced = getSliced;
@@ -18548,7 +18740,7 @@ var require_getSliced = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return arr;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/isWellBehavedNumber.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/isWellBehavedNumber.js
 var require_isWellBehavedNumber = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.isPositiveNumber = isPositiveNumber;
@@ -18560,7 +18752,7 @@ var require_isWellBehavedNumber = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return typeof n === "number" && n > 0 && Number.isFinite(n);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/ChartUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/ChartUtils.js
 var require_ChartUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getCateCoordinateOfBar = exports.getBaseValueOfBar = exports.getBandSizeOfAxis = exports.calculatePolarTooltipPos = exports.calculateCartesianTooltipPos = exports.appendOffsetOfLegend = exports.MIN_VALUE_REG = exports.MAX_VALUE_REG = void 0;
@@ -18984,7 +19176,7 @@ var require_ChartUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.calculatePolarTooltipPos = calculatePolarTooltipPos;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/containerSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/containerSelectors.js
 var require_containerSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectMargin = exports.selectContainerScale = exports.selectChartWidth = exports.selectChartHeight = void 0;
@@ -18997,7 +19189,7 @@ var require_containerSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var selectMargin = (state) => state.layout.margin;
 	exports.selectMargin = selectMargin;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectAllAxes.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectAllAxes.js
 var require_selectAllAxes = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectAllYAxes = exports.selectAllXAxes = void 0;
@@ -19009,7 +19201,7 @@ var require_selectAllAxes = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return Object.values(yAxisMap);
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/Constants.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/Constants.js
 var require_Constants = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.DEFAULT_Y_AXIS_WIDTH = exports.DEFAULT_X_AXIS_HEIGHT = exports.DATA_ITEM_INDEX_ATTRIBUTE_NAME = exports.DATA_ITEM_GRAPHICAL_ITEM_ID_ATTRIBUTE_NAME = exports.COLOR_PANEL = void 0;
@@ -19044,7 +19236,7 @@ var require_Constants = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.DEFAULT_Y_AXIS_WIDTH = 60;
 	exports.DEFAULT_X_AXIS_HEIGHT = 30;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectChartOffsetInternal.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectChartOffsetInternal.js
 var require_selectChartOffsetInternal = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectAxisViewBox = void 0;
@@ -19177,7 +19369,7 @@ var require_selectChartOffsetInternal = /* @__PURE__ */ __commonJSMin(((exports)
 		height
 	}));
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/PanoramaContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/PanoramaContext.js
 var require_PanoramaContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useIsPanorama = exports.PanoramaContextProvider = void 0;
@@ -19209,7 +19401,7 @@ var require_PanoramaContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.PanoramaContextProvider = PanoramaContextProvider;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/brushSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/brushSelectors.js
 var require_brushSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectBrushSettings = exports.selectBrushDimensions = void 0;
@@ -19408,7 +19600,7 @@ var require_throttle$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_throttle = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_throttle$1().throttle;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/LogUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/LogUtils.js
 var require_LogUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.warn = void 0;
@@ -19427,7 +19619,7 @@ var require_LogUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/responsiveContainerUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/responsiveContainerUtils.js
 var require_responsiveContainerUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultResponsiveContainerProps = exports.calculateChartDimensions = void 0;
@@ -19512,7 +19704,7 @@ var require_responsiveContainerUtils = /* @__PURE__ */ __commonJSMin(((exports) 
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/ResponsiveContainer.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/ResponsiveContainer.js
 var require_ResponsiveContainer = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useResponsiveContainerContext = exports.ResponsiveContainer = void 0;
@@ -19782,7 +19974,7 @@ var require_ResponsiveContainer = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}));
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/chartLayoutContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/chartLayoutContext.js
 var require_chartLayoutContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useViewBox = exports.usePolarChartLayout = exports.useOffsetInternal = exports.useMargin = exports.useIsInChartContext = exports.useChartWidth = exports.useChartLayout = exports.useChartHeight = exports.useCartesianChartLayout = exports.selectPolarChartLayout = exports.selectChartLayout = exports.ReportChartSize = exports.ReportChartMargin = void 0;
@@ -21052,7 +21244,7 @@ var require_immer_cjs_production = /* @__PURE__ */ __commonJSMin(((exports, modu
 var require_cjs$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_immer_cjs_production();
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/legendSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/legendSlice.js
 var require_legendSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.setLegendSize = exports.setLegendSettings = exports.replaceLegendPayload = exports.removeLegendPayload = exports.legendReducer = exports.addLegendPayload = void 0;
@@ -21193,7 +21385,7 @@ var require_use_sync_external_store_with_selector_production = /* @__PURE__ */ _
 var require_with_selector = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_use_sync_external_store_with_selector_production();
 }));
-// node_modules/.pnpm/react-redux@9.3.1_@types+re_673c61bf62916b880a0977f42dafd6f7/node_modules/react-redux/dist/cjs/react-redux.production.min.cjs
+// node_modules/.pnpm/react-redux@9.3.1_@types+react@19.3.0_react@18.3.1_redux@5.0.1/node_modules/react-redux/dist/cjs/react-redux.production.min.cjs
 var require_react_redux_production_min = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, Symbol.toStringTag, { value: `Module` });
 	var e = Object.create;
@@ -21687,11 +21879,11 @@ var require_react_redux_production_min = /* @__PURE__ */ __commonJSMin(((exports
 	const ke = N;
 	exports.Provider = Te, exports.ReactReduxContext = K, exports.batch = ke, exports.connect = Ce, exports.createDispatchHook = Q, exports.createSelectorHook = $, exports.createStoreHook = X, exports.legacy_connect = we, exports.shallowEqual = z, exports.useDispatch = Ee, exports.useSelector = Oe, exports.useStore = Z;
 }));
-// node_modules/.pnpm/react-redux@9.3.1_@types+re_673c61bf62916b880a0977f42dafd6f7/node_modules/react-redux/dist/cjs/index.js
+// node_modules/.pnpm/react-redux@9.3.1_@types+react@19.3.0_react@18.3.1_redux@5.0.1/node_modules/react-redux/dist/cjs/index.js
 var require_cjs = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_redux_production_min();
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/propsAreEqual.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/propsAreEqual.js
 var require_propsAreEqual = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.propsAreEqual = propsAreEqual;
@@ -21756,7 +21948,7 @@ var require_propsAreEqual = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return true;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectLegendArea.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectLegendArea.js
 var require_selectLegendArea = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectLegendArea = void 0;
@@ -21775,7 +21967,7 @@ var require_selectLegendArea = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/cartesianPositionToCSSTranslate.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/cartesianPositionToCSSTranslate.js
 var require_cartesianPositionToCSSTranslate = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.cartesianPositionToCSSTranslate = cartesianPositionToCSSTranslate;
@@ -21810,7 +22002,7 @@ var require_cartesianPositionToCSSTranslate = /* @__PURE__ */ __commonJSMin(((ex
 		return "translate(".concat(x, ", ").concat(y, ")");
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Legend.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Legend.js
 var require_Legend = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.legendDefaultProps = exports.Legend = void 0;
@@ -22132,7 +22324,7 @@ var require_Legend = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var Legend = exports.Legend = /*#__PURE__*/ React.memo(LegendImpl, _propsAreEqual.propsAreEqual);
 	Legend.displayName = "Legend";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/DefaultTooltipContent.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/DefaultTooltipContent.js
 var require_DefaultTooltipContent = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultDefaultTooltipContentProps = exports.DefaultTooltipContent = void 0;
@@ -22346,7 +22538,7 @@ var require_DefaultTooltipContent = /* @__PURE__ */ __commonJSMin(((exports) => 
 	};
 	exports.DefaultTooltipContent = DefaultTooltipContent;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/tooltip/translate.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/tooltip/translate.js
 var require_translate = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getTooltipCSSClassName = getTooltipCSSClassName;
@@ -22428,7 +22620,7 @@ var require_translate = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/Global.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/Global.js
 var require_Global = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Global = void 0;
@@ -22438,7 +22630,7 @@ var require_Global = /* @__PURE__ */ __commonJSMin(((exports) => {
 		isSsr: parseIsSsrByDefault()
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/usePrefersReducedMotion.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/usePrefersReducedMotion.js
 var require_usePrefersReducedMotion = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.usePrefersReducedMotion = usePrefersReducedMotion;
@@ -22511,7 +22703,7 @@ var require_usePrefersReducedMotion = /* @__PURE__ */ __commonJSMin(((exports) =
 		return prefersReducedMotion;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/TooltipBoundingBox.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/TooltipBoundingBox.js
 var require_TooltipBoundingBox = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.TooltipBoundingBox = void 0;
@@ -22689,7 +22881,7 @@ var require_TooltipBoundingBox = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	exports.TooltipBoundingBox = /*#__PURE__*/ React.memo(TooltipBoundingBoxImpl);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/accessibilityContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/accessibilityContext.js
 var require_accessibilityContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useAccessibilityLayer = void 0;
@@ -22700,7 +22892,7 @@ var require_accessibilityContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.useAccessibilityLayer = useAccessibilityLayer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Curve.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Curve.js
 var require_Curve = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getPath = exports.defaultCurveProps = exports.Curve = void 0;
@@ -22861,7 +23053,7 @@ var require_Curve = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.Curve = Curve;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Cross.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Cross.js
 var require_Cross = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Cross = void 0;
@@ -22989,7 +23181,7 @@ var require_Cross = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.Cross = Cross;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/cursor/getCursorRectangle.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/cursor/getCursorRectangle.js
 var require_getCursorRectangle = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getCursorRectangle = getCursorRectangle;
@@ -23005,7 +23197,7 @@ var require_getCursorRectangle = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/easing.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/easing.js
 var require_easing = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.createSpringEasing = exports.createEasingFunction = exports.configBezier = exports.ACCURACY = void 0;
@@ -23162,7 +23354,7 @@ var require_easing = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.createEasingFunction = createEasingFunction;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/AnimationControllerImpl.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/AnimationControllerImpl.js
 var require_AnimationControllerImpl = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.animationControllerImpl = void 0;
@@ -23197,7 +23389,7 @@ var require_AnimationControllerImpl = /* @__PURE__ */ __commonJSMin(((exports) =
 	};
 	exports.animationControllerImpl = animationControllerImpl;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/useAnimationController.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/useAnimationController.js
 var require_useAnimationController = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AnimationControllerProvider = void 0;
@@ -23211,7 +23403,7 @@ var require_useAnimationController = /* @__PURE__ */ __commonJSMin(((exports) =>
 		return (0, _react.useMemo)(() => animationControllerFromProps !== null && animationControllerFromProps !== void 0 ? animationControllerFromProps : animationControllerFromContext, [animationControllerFromProps, animationControllerFromContext]);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/AnimationHandle.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/AnimationHandle.js
 var require_AnimationHandle = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.JavascriptAnimation = exports.CSSTransitionAnimation = void 0;
@@ -23463,7 +23655,7 @@ var require_AnimationHandle = /* @__PURE__ */ __commonJSMin(((exports) => {
 	*/
 	exports.CSSTransitionAnimation = CSSTransitionAnimation;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/timeoutController.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/timeoutController.js
 var require_timeoutController = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RequestAnimationFrameTimeoutController = void 0;
@@ -23508,7 +23700,7 @@ var require_timeoutController = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.RequestAnimationFrameTimeoutController = RequestAnimationFrameTimeoutController;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/JavascriptAnimate.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/JavascriptAnimate.js
 var require_JavascriptAnimate = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.JavascriptAnimate = JavascriptAnimate;
@@ -23611,7 +23803,7 @@ var require_JavascriptAnimate = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return children(Number(style));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/useAnimationId.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/useAnimationId.js
 var require_useAnimationId = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useAnimationId = useAnimationId;
@@ -23642,7 +23834,7 @@ var require_useAnimationId = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return animationId.current;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/util.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/util.js
 var require_util = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getTransitionVal = exports.getDashCase = void 0;
@@ -23651,7 +23843,7 @@ var require_util = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var getTransitionVal = (props, duration, easing) => props.map((prop) => "".concat(getDashCase(prop), " ").concat(duration, "ms ").concat(easing)).join(",");
 	exports.getTransitionVal = getTransitionVal;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Rectangle.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Rectangle.js
 var require_Rectangle = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultRectangleProps = exports.Rectangle = void 0;
@@ -24047,7 +24239,7 @@ var require_Rectangle = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.Rectangle = Rectangle;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/PolarUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/PolarUtils.js
 var require_PolarUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.radianToDegree = exports.polarToCartesian = exports.inRangeOfSector = exports.getMaxRadius = exports.degreeToRadian = exports.RADIAN = void 0;
@@ -24189,7 +24381,7 @@ var require_PolarUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.inRangeOfSector = inRangeOfSector;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/cursor/getRadialCursorPoints.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/cursor/getRadialCursorPoints.js
 var require_getRadialCursorPoints = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getRadialCursorPoints = getRadialCursorPoints;
@@ -24211,7 +24403,7 @@ var require_getRadialCursorPoints = /* @__PURE__ */ __commonJSMin(((exports) => 
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Sector.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Sector.js
 var require_Sector = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultSectorProps = exports.Sector = void 0;
@@ -24478,7 +24670,7 @@ var require_Sector = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.Sector = Sector;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/cursor/getCursorPoints.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/cursor/getCursorPoints.js
 var require_getCursorPoints = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getCursorPoints = getCursorPoints;
@@ -24609,7 +24801,7 @@ var require_range$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_range$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_range$2().range;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/dataSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/dataSelectors.js
 var require_dataSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectChartDataWithIndexesIfNotInPanoramaPosition4 = exports.selectChartDataWithIndexesIfNotInPanoramaPosition3 = exports.selectChartDataWithIndexes = exports.selectChartDataSliceWithIndexes = exports.selectChartDataSliceIgnoringIndexes = exports.selectChartDataSliceIfNotInPanorama = exports.selectChartDataAndAlwaysIgnoreIndexes = void 0;
@@ -24673,7 +24865,7 @@ var require_dataSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return chartData != null ? chartData.slice(dataStartIndex, dataEndIndex + 1) : [];
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/isDomainSpecifiedByUser.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/isDomainSpecifiedByUser.js
 var require_isDomainSpecifiedByUser = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.extendDomain = extendDomain;
@@ -25737,7 +25929,7 @@ var require_decimal = /* @__PURE__ */ __commonJSMin(((exports, module, this$1) =
 		}
 	})(this$1);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/scale/util/arithmetic.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/scale/util/arithmetic.js
 var require_arithmetic = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getDigitCount = getDigitCount;
@@ -25787,7 +25979,7 @@ var require_arithmetic = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return result;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/scale/getNiceTickValues.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/scale/getNiceTickValues.js
 var require_getNiceTickValues = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getValidInterval = exports.getTickValuesFixedDomain = exports.getTickOfSingleValue = exports.getSnap125Step = exports.getNiceTickValues = exports.getAdaptiveStep = exports.calculateStep = void 0;
@@ -26013,7 +26205,7 @@ var require_getNiceTickValues = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return min > max ? values.reverse() : values;
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/scale/index.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/scale/index.js
 var require_scale = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	Object.defineProperty(exports, "getNiceTickValues", {
@@ -26030,7 +26222,7 @@ var require_scale = /* @__PURE__ */ __commonJSMin(((exports) => {
 	});
 	var _getNiceTickValues = require_getNiceTickValues();
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/rootPropsSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/rootPropsSelectors.js
 var require_rootPropsSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectSyncMethod = exports.selectSyncId = exports.selectStackOffsetType = exports.selectRootMaxBarSize = exports.selectRootBarSize = exports.selectReverseStackOrder = exports.selectEventEmitter = exports.selectChartName = exports.selectChartBaseValue = exports.selectBarGap = exports.selectBarCategoryGap = void 0;
@@ -26057,7 +26249,7 @@ var require_rootPropsSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var selectChartBaseValue = (state) => state.rootProps.baseValue;
 	exports.selectChartBaseValue = selectChartBaseValue;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/zIndex/DefaultZIndexes.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/zIndex/DefaultZIndexes.js
 var require_DefaultZIndexes = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.DefaultZIndexes = void 0;
@@ -26125,7 +26317,7 @@ var require_DefaultZIndexes = /* @__PURE__ */ __commonJSMin(((exports) => {
 		label: 2e3
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/defaultPolarAngleAxisProps.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/defaultPolarAngleAxisProps.js
 var require_defaultPolarAngleAxisProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultPolarAngleAxisProps = void 0;
@@ -26153,7 +26345,7 @@ var require_defaultPolarAngleAxisProps = /* @__PURE__ */ __commonJSMin(((exports
 		zIndex: require_DefaultZIndexes().DefaultZIndexes.axis
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/defaultPolarRadiusAxisProps.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/defaultPolarRadiusAxisProps.js
 var require_defaultPolarRadiusAxisProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultPolarRadiusAxisProps = void 0;
@@ -26179,7 +26371,7 @@ var require_defaultPolarRadiusAxisProps = /* @__PURE__ */ __commonJSMin(((export
 		zIndex: require_DefaultZIndexes().DefaultZIndexes.axis
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineAxisRangeWithReverse.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineAxisRangeWithReverse.js
 var require_combineAxisRangeWithReverse = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineAxisRangeWithReverse = void 0;
@@ -26190,7 +26382,7 @@ var require_combineAxisRangeWithReverse = /* @__PURE__ */ __commonJSMin(((export
 	};
 	exports.combineAxisRangeWithReverse = combineAxisRangeWithReverse;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/getAxisTypeBasedOnLayout.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/getAxisTypeBasedOnLayout.js
 var require_getAxisTypeBasedOnLayout = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getAxisTypeBasedOnLayout = getAxisTypeBasedOnLayout;
@@ -26205,7 +26397,7 @@ var require_getAxisTypeBasedOnLayout = /* @__PURE__ */ __commonJSMin(((exports) 
 		return (0, _ChartUtils.isCategoricalAxis)(layout, axisType) ? "category" : "number";
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/polarAxisSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/polarAxisSelectors.js
 var require_polarAxisSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectRadiusAxisRangeWithReversed = exports.selectRadiusAxisRange = exports.selectRadiusAxis = exports.selectPolarViewBox = exports.selectPolarOptions = exports.selectOuterRadius = exports.selectMaxRadius = exports.selectAngleAxisRangeWithReversed = exports.selectAngleAxisRange = exports.selectAngleAxis = exports.implicitRadiusAxis = exports.implicitAngleAxis = void 0;
@@ -26368,21 +26560,21 @@ var require_polarAxisSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/pickAxisType.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/pickAxisType.js
 var require_pickAxisType = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.pickAxisType = void 0;
 	var pickAxisType = (_state, axisType) => axisType;
 	exports.pickAxisType = pickAxisType;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/pickAxisId.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/pickAxisId.js
 var require_pickAxisId = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.pickAxisId = void 0;
 	var pickAxisId = (_state, _axisType, axisId) => axisId;
 	exports.pickAxisId = pickAxisId;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/stacks/getStackSeriesIdentifier.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/stacks/getStackSeriesIdentifier.js
 var require_getStackSeriesIdentifier = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getStackSeriesIdentifier = getStackSeriesIdentifier;
@@ -26395,7 +26587,7 @@ var require_getStackSeriesIdentifier = /* @__PURE__ */ __commonJSMin(((exports) 
 		return graphicalItem === null || graphicalItem === void 0 ? void 0 : graphicalItem.id;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineDisplayedStackedData.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineDisplayedStackedData.js
 var require_combineDisplayedStackedData = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineDisplayedStackedData = combineDisplayedStackedData;
@@ -26433,7 +26625,7 @@ var require_combineDisplayedStackedData = /* @__PURE__ */ __commonJSMin(((export
 		return Array.from(knownItemsByDataKey.values());
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/types/StackedGraphicalItem.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/types/StackedGraphicalItem.js
 var require_StackedGraphicalItem = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.isStacked = isStacked;
@@ -26450,7 +26642,7 @@ var require_StackedGraphicalItem = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return "stackId" in graphicalItem && graphicalItem.stackId != null && graphicalItem.dataKey != null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/numberDomainEqualityCheck.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/numberDomainEqualityCheck.js
 var require_numberDomainEqualityCheck = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.numberDomainEqualityCheck = void 0;
@@ -26461,7 +26653,7 @@ var require_numberDomainEqualityCheck = /* @__PURE__ */ __commonJSMin(((exports)
 	};
 	exports.numberDomainEqualityCheck = numberDomainEqualityCheck;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/arrayEqualityCheck.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/arrayEqualityCheck.js
 var require_arrayEqualityCheck = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.arrayContentsAreEqualCheck = arrayContentsAreEqualCheck;
@@ -26489,7 +26681,7 @@ var require_arrayEqualityCheck = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return false;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectTooltipAxisType.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectTooltipAxisType.js
 var require_selectTooltipAxisType = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectTooltipAxisType = void 0;
@@ -26509,14 +26701,14 @@ var require_selectTooltipAxisType = /* @__PURE__ */ __commonJSMin(((exports) => 
 	};
 	exports.selectTooltipAxisType = selectTooltipAxisType;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectTooltipAxisId.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectTooltipAxisId.js
 var require_selectTooltipAxisId = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectTooltipAxisId = void 0;
 	var selectTooltipAxisId = (state) => state.tooltip.settings.axisId;
 	exports.selectTooltipAxisId = selectTooltipAxisId;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/scale/RechartsScale.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/scale/RechartsScale.js
 var require_RechartsScale = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.rechartsScaleFactory = rechartsScaleFactory;
@@ -26576,7 +26768,7 @@ var require_RechartsScale = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineCheckedDomain.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineCheckedDomain.js
 var require_combineCheckedDomain = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineCheckedDomain = void 0;
@@ -33458,7 +33650,7 @@ var require_src = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_d3_scale = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_src();
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineConfiguredScale.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineConfiguredScale.js
 var require_combineConfiguredScale = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineConfiguredScale = combineConfiguredScale;
@@ -33508,7 +33700,7 @@ var require_combineConfiguredScale = /* @__PURE__ */ __commonJSMin(((exports) =>
 		return combineConfiguredScaleInternal(realScaleType, axisDomain, axisRange);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineRealScaleType.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineRealScaleType.js
 var require_combineRealScaleType = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineRealScaleType = void 0;
@@ -33549,7 +33741,7 @@ var require_combineRealScaleType = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.combineRealScaleType = combineRealScaleType;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/scale/createCategoricalInverse.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/scale/createCategoricalInverse.js
 var require_createCategoricalInverse = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.bisect = bisect;
@@ -33600,7 +33792,7 @@ var require_createCategoricalInverse = /* @__PURE__ */ __commonJSMin(((exports) 
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineInverseScaleFunction.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineInverseScaleFunction.js
 var require_combineInverseScaleFunction = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineInverseScaleFunction = combineInverseScaleFunction;
@@ -33611,7 +33803,7 @@ var require_combineInverseScaleFunction = /* @__PURE__ */ __commonJSMin(((export
 		return (0, _createCategoricalInverse.createCategoricalInverse)(configuredScale, void 0);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/axisSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/axisSelectors.js
 var require_axisSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getDomainDefinition = exports.filterReferenceElements = exports.filterGraphicalNotStackedItems = exports.defaultNumericDomain = exports.combineStackGroups = exports.combineNumericalDomain = exports.combineNumericTicksDomain = exports.combineNiceTicks = exports.combineLinesDomain = exports.combineGraphicalItemsSettings = exports.combineGraphicalItemsData = exports.combineGraphicalItemTicks = exports.combineDuplicateDomain = exports.combineDotsDomain = exports.combineDomainOfStackGroups = exports.combineDomainOfAllAppliedNumericalValuesIncludingErrorValues = exports.combineDisplayedData = exports.combineCategoricalDomain = exports.combineAxisTicks = exports.combineAxisDomainWithNiceTicks = exports.combineAxisDomain = exports.combineAreasDomain = exports.combineAppliedValues = exports.combineAllAppliedValues = void 0;
@@ -34873,7 +35065,7 @@ var require_axisSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectTooltipEventType.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectTooltipEventType.js
 var require_selectTooltipEventType = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineTooltipEventType = combineTooltipEventType;
@@ -34899,7 +35091,7 @@ var require_selectTooltipEventType = /* @__PURE__ */ __commonJSMin(((exports) =>
 		return (0, _hooks.useAppSelector)((state) => selectTooltipEventType(state, shared));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineActiveLabel.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineActiveLabel.js
 var require_combineActiveLabel = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineActiveLabel = void 0;
@@ -34912,14 +35104,14 @@ var require_combineActiveLabel = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.combineActiveLabel = combineActiveLabel;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectTooltipSettings.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectTooltipSettings.js
 var require_selectTooltipSettings = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectTooltipSettings = void 0;
 	var selectTooltipSettings = (state) => state.tooltip.settings;
 	exports.selectTooltipSettings = selectTooltipSettings;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/tooltipSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/tooltipSlice.js
 var require_tooltipSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.tooltipReducer = exports.setTooltipSettingsState = exports.setSyncInteraction = exports.setMouseOverAxisIndex = exports.setMouseClickAxisIndex = exports.setKeyboardInteraction = exports.setActiveMouseOverItemIndex = exports.setActiveClickItemIndex = exports.replaceTooltipEntrySettings = exports.removeTooltipEntrySettings = exports.noInteraction = exports.mouseLeaveItem = exports.mouseLeaveChart = exports.initialState = exports.addTooltipEntrySettings = void 0;
@@ -35119,7 +35311,7 @@ var require_tooltipSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.setKeyboardInteraction = _tooltipSlice$actions.setKeyboardInteraction;
 	exports.tooltipReducer = tooltipSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineTooltipInteractionState.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineTooltipInteractionState.js
 var require_combineTooltipInteractionState = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineTooltipInteractionState = void 0;
@@ -35199,7 +35391,7 @@ var require_combineTooltipInteractionState = /* @__PURE__ */ __commonJSMin(((exp
 	};
 	exports.combineTooltipInteractionState = combineTooltipInteractionState;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineActiveTooltipIndex.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineActiveTooltipIndex.js
 var require_combineActiveTooltipIndex = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineActiveTooltipIndex = void 0;
@@ -35245,7 +35437,7 @@ var require_combineActiveTooltipIndex = /* @__PURE__ */ __commonJSMin(((exports)
 	};
 	exports.combineActiveTooltipIndex = combineActiveTooltipIndex;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineCoordinateForDefaultIndex.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineCoordinateForDefaultIndex.js
 var require_combineCoordinateForDefaultIndex = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineCoordinateForDefaultIndex = void 0;
@@ -35269,7 +35461,7 @@ var require_combineCoordinateForDefaultIndex = /* @__PURE__ */ __commonJSMin(((e
 	};
 	exports.combineCoordinateForDefaultIndex = combineCoordinateForDefaultIndex;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineTooltipPayloadConfigurations.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineTooltipPayloadConfigurations.js
 var require_combineTooltipPayloadConfigurations = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineTooltipPayloadConfigurations = void 0;
@@ -35292,21 +35484,21 @@ var require_combineTooltipPayloadConfigurations = /* @__PURE__ */ __commonJSMin(
 	};
 	exports.combineTooltipPayloadConfigurations = combineTooltipPayloadConfigurations;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectTooltipPayloadSearcher.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectTooltipPayloadSearcher.js
 var require_selectTooltipPayloadSearcher = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectTooltipPayloadSearcher = void 0;
 	var selectTooltipPayloadSearcher = (state) => state.options.tooltipPayloadSearcher;
 	exports.selectTooltipPayloadSearcher = selectTooltipPayloadSearcher;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectTooltipState.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectTooltipState.js
 var require_selectTooltipState = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectTooltipState = void 0;
 	var selectTooltipState = (state) => state.tooltip;
 	exports.selectTooltipState = selectTooltipState;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineTooltipPayload.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineTooltipPayload.js
 var require_combineTooltipPayload = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineTooltipPayload = void 0;
@@ -35434,7 +35626,7 @@ var require_combineTooltipPayload = /* @__PURE__ */ __commonJSMin(((exports) => 
 	};
 	exports.combineTooltipPayload = combineTooltipPayload;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/tooltipSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/tooltipSelectors.js
 var require_tooltipSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectTooltipGraphicalItemsData = exports.selectTooltipDisplayedData = exports.selectTooltipCategoricalDomain = exports.selectTooltipAxisTicks = exports.selectTooltipAxisScale = exports.selectTooltipAxisRealScaleType = exports.selectTooltipAxisRangeWithReverse = exports.selectTooltipAxisDomainIncludingNiceTicks = exports.selectTooltipAxisDomain = exports.selectIsTooltipActive = exports.selectAllUnfilteredGraphicalItems = exports.selectAllGraphicalItemsSettings = exports.selectActiveTooltipPayload = exports.selectActiveTooltipIndex = exports.selectActiveTooltipGraphicalItemId = exports.selectActiveTooltipDataPoints = exports.selectActiveTooltipDataKey = exports.selectActiveTooltipCoordinate = exports.selectActiveLabel = void 0;
@@ -35720,7 +35912,7 @@ var require_tooltipSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return Array.from(new Set(dataPoints));
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/useTooltipAxis.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/useTooltipAxis.js
 var require_useTooltipAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useTooltipAxisBandSize = exports.useTooltipAxis = void 0;
@@ -35782,7 +35974,7 @@ var require_useTooltipAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.useTooltipAxisBandSize = useTooltipAxisBandSize;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/getActiveCoordinate.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/getActiveCoordinate.js
 var require_getActiveCoordinate = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getActivePolarCoordinate = exports.getActiveCartesianCoordinate = exports.calculateActiveTickIndex = void 0;
@@ -35957,7 +36149,7 @@ var require_getActiveCoordinate = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.calculateActiveTickIndex = calculateActiveTickIndex;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectors.js
 var require_selectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useChartName = exports.selectTooltipPayloadConfigurations = exports.selectTooltipPayload = exports.selectTooltipInteractionState = exports.selectTooltipDataKey = exports.selectOrderedTooltipTicks = exports.selectIsTooltipActive = exports.selectCoordinateForDefaultIndex = exports.selectActiveLabel = exports.selectActiveIndex = exports.selectActiveCoordinate = exports.combineActiveProps = void 0;
@@ -36081,7 +36273,7 @@ var require_selectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.combineActiveProps = combineActiveProps;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/zIndex/zIndexSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/zIndex/zIndexSelectors.js
 var require_zIndexSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectZIndexPortalElement = exports.selectAllRegisteredZIndexes = void 0;
@@ -36100,7 +36292,7 @@ var require_zIndexSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return Array.from(new Set(allNumbers)).sort((a, b) => a - b);
 	}, { memoizeOptions: { resultEqualityCheck: _arrayEqualityCheck.arrayContentsAreEqualCheck } });
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/zIndexSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/zIndexSlice.js
 var require_zIndexSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.zIndexReducer = exports.unregisterZIndexPortalElement = exports.unregisterZIndexPortal = exports.registerZIndexPortalElement = exports.registerZIndexPortal = void 0;
@@ -36218,7 +36410,7 @@ var require_zIndexSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.unregisterZIndexPortalElement = _zIndexSlice$actions.unregisterZIndexPortalElement;
 	exports.zIndexReducer = zIndexSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/zIndex/ZIndexLayer.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/zIndex/ZIndexLayer.js
 var require_ZIndexLayer = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ZIndexLayer = ZIndexLayer;
@@ -36308,7 +36500,7 @@ var require_ZIndexLayer = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return /*#__PURE__*/ (0, _reactDom.createPortal)(children, targetElement);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Cursor.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Cursor.js
 var require_Cursor = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Cursor = Cursor;
@@ -36471,7 +36663,7 @@ var require_Cursor = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/tooltipPortalContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/tooltipPortalContext.js
 var require_tooltipPortalContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useTooltipPortal = exports.TooltipPortalContext = void 0;
@@ -36715,7 +36907,7 @@ var require_eventemitter3 = /* @__PURE__ */ __commonJSMin(((exports, module) => 
 	EventEmitter.EventEmitter = EventEmitter;
 	if ("undefined" !== typeof module) module.exports = EventEmitter;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/Events.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/Events.js
 var require_Events = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.eventCenter = exports.TOOLTIP_SYNC_EVENT = exports.BRUSH_SYNC_EVENT = void 0;
@@ -36727,7 +36919,7 @@ var require_Events = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.TOOLTIP_SYNC_EVENT = "recharts.syncEvent.tooltip";
 	exports.BRUSH_SYNC_EVENT = "recharts.syncEvent.brush";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/optionsSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/optionsSlice.js
 var require_optionsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.optionsReducer = exports.createEventEmitter = exports.arrayTooltipSearcher = void 0;
@@ -36766,7 +36958,7 @@ var require_optionsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.optionsReducer = optionsSlice.reducer;
 	exports.createEventEmitter = optionsSlice.actions.createEventEmitter;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/synchronisation/syncSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/synchronisation/syncSelectors.js
 var require_syncSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectSynchronisedTooltipState = selectSynchronisedTooltipState;
@@ -36774,7 +36966,7 @@ var require_syncSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return state.tooltip.syncInteraction;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/chartDataSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/chartDataSlice.js
 var require_chartDataSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.setDataStartEndIndexes = exports.setComputedData = exports.setChartData = exports.initialChartDataState = exports.chartDataReducer = void 0;
@@ -36832,7 +37024,7 @@ var require_chartDataSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.setComputedData = _chartDataSlice$actio.setComputedData;
 	exports.chartDataReducer = chartDataSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/synchronisation/useChartSynchronisation.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/synchronisation/useChartSynchronisation.js
 var require_useChartSynchronisation = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useBrushChartSynchronisation = useBrushChartSynchronisation;
@@ -37152,7 +37344,7 @@ var require_useChartSynchronisation = /* @__PURE__ */ __commonJSMin(((exports) =
 		]);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Tooltip.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Tooltip.js
 var require_Tooltip = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Tooltip = Tooltip;
@@ -37400,7 +37592,7 @@ var require_Tooltip = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Cell.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Cell.js
 var require_Cell = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Cell = void 0;
@@ -37421,7 +37613,7 @@ var require_Cell = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.Cell = Cell;
 	Cell.displayName = "Cell";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/LRUCache.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/LRUCache.js
 var require_LRUCache = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.LRUCache = void 0;
@@ -37480,7 +37672,7 @@ var require_LRUCache = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.LRUCache = LRUCache;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/DOMUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/DOMUtils.js
 var require_DOMUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getTextMeasurementConfig = exports.getStringSize = exports.getStringCacheStats = exports.configureTextMeasurement = exports.clearStringCache = void 0;
@@ -37631,7 +37823,7 @@ var require_DOMUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	});
 	exports.getStringCacheStats = getStringCacheStats;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/ReduceCSSCalc.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/ReduceCSSCalc.js
 var require_ReduceCSSCalc = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.reduceCSSCalc = reduceCSSCalc;
@@ -37830,7 +38022,7 @@ var require_ReduceCSSCalc = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return result;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Text.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Text.js
 var require_Text = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getWordsByLines = exports.Text = void 0;
@@ -38141,7 +38333,7 @@ var require_Text = /* @__PURE__ */ __commonJSMin(((exports) => {
 	});
 	Text.displayName = "Text";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Label.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Label.js
 var require_Label = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.CartesianLabelContextProvider = void 0;
@@ -38521,7 +38713,7 @@ var require_Label = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return parseLabel(label, usePolarLabelContext()) || null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/LabelList.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/LabelList.js
 var require_LabelList = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.CartesianLabelListContextProvider = void 0;
@@ -38670,7 +38862,7 @@ var require_LabelList = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Customized.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Customized.js
 var require_Customized = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Customized = Customized;
@@ -38737,7 +38929,7 @@ var require_Customized = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	Customized.displayName = "Customized";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Polygon.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Polygon.js
 var require_Polygon = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Polygon = void 0;
@@ -38871,7 +39063,7 @@ var require_Polygon = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.Polygon = Polygon;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Dot.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Dot.js
 var require_Dot = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Dot = void 0;
@@ -38929,7 +39121,7 @@ var require_Dot = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.Dot = Dot;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/polarSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/polarSelectors.js
 var require_polarSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectUnfilteredPolarItems = exports.selectPolarNiceTicks = exports.selectPolarItemsSettings = exports.selectPolarDisplayedData = exports.selectPolarAxisDomainIncludingNiceTicks = exports.selectPolarAxisDomain = exports.selectPolarAxisCheckedDomain = exports.selectPolarAppliedValues = exports.selectAllPolarAppliedNumericalValues = void 0;
@@ -39021,7 +39213,7 @@ var require_polarSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	], _axisSelectors.combineAxisDomainWithNiceTicks);
 	exports.selectPolarAxisCheckedDomain = (0, _reselect.createSelector)([_axisSelectors.selectRealScaleType, selectPolarAxisDomainIncludingNiceTicks], _combineCheckedDomain.combineCheckedDomain);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/polarScaleSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/polarScaleSelectors.js
 var require_polarScaleSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectPolarGraphicalItemAxisTicks = exports.selectPolarCategoricalDomain = exports.selectPolarAxisTicks = exports.selectPolarAxisScale = exports.selectPolarAxis = exports.selectPolarAngleAxisTicks = void 0;
@@ -39091,7 +39283,7 @@ var require_polarScaleSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		_pickAxisType.pickAxisType
 	], _axisSelectors.combineGraphicalItemTicks);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/polarGridSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/polarGridSelectors.js
 var require_polarGridSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectPolarGridRadii = exports.selectPolarGridAngles = void 0;
@@ -39108,7 +39300,7 @@ var require_polarGridSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return ticks.map((tick) => tick.coordinate);
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/PolarGrid.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/PolarGrid.js
 var require_PolarGrid = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultPolarGridProps = exports.PolarGrid = void 0;
@@ -39452,7 +39644,7 @@ var require_minBy$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_minBy = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_minBy$1().minBy;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/polarAxisSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/polarAxisSlice.js
 var require_polarAxisSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.removeRadiusAxis = exports.removeAngleAxis = exports.polarAxisReducer = exports.addRadiusAxis = exports.addAngleAxis = void 0;
@@ -39486,7 +39678,7 @@ var require_polarAxisSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.removeAngleAxis = _polarAxisSlice$actio.removeAngleAxis;
 	exports.polarAxisReducer = polarAxisSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/getClassNameFromUnknown.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/getClassNameFromUnknown.js
 var require_getClassNameFromUnknown = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getClassNameFromUnknown = getClassNameFromUnknown;
@@ -39495,7 +39687,7 @@ var require_getClassNameFromUnknown = /* @__PURE__ */ __commonJSMin(((exports) =
 		return "";
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/PolarRadiusAxis.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/PolarRadiusAxis.js
 var require_PolarRadiusAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.PolarRadiusAxis = PolarRadiusAxis;
@@ -39762,7 +39954,7 @@ var require_PolarRadiusAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	PolarRadiusAxis.displayName = "PolarRadiusAxis";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/PolarAngleAxis.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/PolarAngleAxis.js
 var require_PolarAngleAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.PolarAngleAxis = PolarAngleAxis;
@@ -40037,7 +40229,7 @@ var require_PolarAngleAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	PolarAngleAxis.displayName = "PolarAngleAxis";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/pieSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/pieSelectors.js
 var require_pieSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectPieSectors = exports.selectPieLegend = exports.selectDisplayedData = void 0;
@@ -40254,7 +40446,7 @@ var require_react_is_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_react_is = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_is_production();
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/ReactUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/ReactUtils.js
 var require_ReactUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.SCALE_TYPES = void 0;
@@ -40344,7 +40536,7 @@ var require_ReactUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.isClipDot = isClipDot;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/ActiveShapeUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/ActiveShapeUtils.js
 var require_ActiveShapeUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Shape = Shape;
@@ -40464,7 +40656,7 @@ var require_ActiveShapeUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return /*#__PURE__*/ React.createElement(_Layer.Layer, { className: inActiveClassName }, shape);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/tooltipContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/tooltipContext.js
 var require_tooltipContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useMouseLeaveItemDispatch = exports.useMouseEnterItemDispatch = exports.useMouseClickItemDispatch = void 0;
@@ -40509,7 +40701,7 @@ var require_tooltipContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.useMouseClickItemDispatch = useMouseClickItemDispatch;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/SetTooltipEntrySettings.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/SetTooltipEntrySettings.js
 var require_SetTooltipEntrySettings = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.SetTooltipEntrySettings = SetTooltipEntrySettings;
@@ -40546,7 +40738,7 @@ var require_SetTooltipEntrySettings = /* @__PURE__ */ __commonJSMin(((exports) =
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/SetLegendPayload.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/SetLegendPayload.js
 var require_SetLegendPayload = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.SetLegendPayload = SetLegendPayload;
@@ -40613,7 +40805,7 @@ var require_SetLegendPayload = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/matchBy.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/matchBy.js
 var require_matchBy = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.matchAnimationItems = matchAnimationItems;
@@ -40838,7 +41030,7 @@ var require_matchBy = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return matchByKey(prevItems, nextItems, matchBy);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/useAnimationStartSnapshot.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/useAnimationStartSnapshot.js
 var require_useAnimationStartSnapshot = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useAnimationStartSnapshot = useAnimationStartSnapshot;
@@ -40902,7 +41094,7 @@ var require_useAnimationStartSnapshot = /* @__PURE__ */ __commonJSMin(((exports)
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/AnimatedItems.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/AnimatedItems.js
 var require_AnimatedItems = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AnimatedItems = AnimatedItems;
@@ -41050,7 +41242,7 @@ var require_AnimatedItems = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/useId.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/useId.js
 var require_useId = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useIdFallback = exports.useId = void 0;
@@ -41128,7 +41320,7 @@ var require_useId = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.useIdFallback = useIdFallback;
 	exports.useId = (_ref = React["useId".toString()]) !== null && _ref !== void 0 ? _ref : useIdFallback;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/useUniqueId.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/useUniqueId.js
 var require_useUniqueId = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useUniqueId = useUniqueId;
@@ -41153,7 +41345,7 @@ var require_useUniqueId = /* @__PURE__ */ __commonJSMin(((exports) => {
 * The useUniqueId hook returns a unique ID that is either reused from external props or generated internally.
 * Either way the ID is now guaranteed to be present so no more nulls or undefined.
 */
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/RegisterGraphicalItemId.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/RegisterGraphicalItemId.js
 var require_RegisterGraphicalItemId = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RegisterGraphicalItemId = void 0;
@@ -41189,7 +41381,7 @@ var require_RegisterGraphicalItemId = /* @__PURE__ */ __commonJSMin(((exports) =
 		return (0, _react.useContext)(GraphicalItemIdContext);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/graphicalItemsSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/graphicalItemsSlice.js
 var require_graphicalItemsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.replacePolarGraphicalItem = exports.replaceCartesianGraphicalItem = exports.removePolarGraphicalItem = exports.removeCartesianGraphicalItem = exports.graphicalItemsReducer = exports.addPolarGraphicalItem = exports.addCartesianGraphicalItem = void 0;
@@ -41255,7 +41447,7 @@ var require_graphicalItemsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.replacePolarGraphicalItem = _graphicalItemsSlice$.replacePolarGraphicalItem;
 	exports.graphicalItemsReducer = graphicalItemsSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/SetGraphicalItem.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/SetGraphicalItem.js
 var require_SetGraphicalItem = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.SetPolarGraphicalItem = exports.SetCartesianGraphicalItem = void 0;
@@ -41307,7 +41499,7 @@ var require_SetGraphicalItem = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.SetPolarGraphicalItem = /*#__PURE__*/ (0, _react.memo)(SetPolarGraphicalItemImpl);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/Pie.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/Pie.js
 var require_Pie = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Pie = void 0;
@@ -41977,7 +42169,7 @@ var require_last$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_last$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_last$2().last;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/Dots.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/Dots.js
 var require_Dots = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Dots = Dots;
@@ -42120,7 +42312,7 @@ var require_Dots = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return /*#__PURE__*/ React.createElement(_ZIndexLayer.ZIndexLayer, { zIndex }, /*#__PURE__*/ React.createElement(_Layer.Layer, _extends({ className }, layerProps), dots));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/cartesianAxisSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/cartesianAxisSlice.js
 var require_cartesianAxisSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.updateYAxisWidth = exports.updateXAxisHeight = exports.replaceZAxis = exports.replaceYAxis = exports.replaceXAxis = exports.removeZAxis = exports.removeYAxis = exports.removeXAxis = exports.defaultAxisId = exports.cartesianAxisReducer = exports.addZAxis = exports.addYAxis = exports.addXAxis = void 0;
@@ -42292,7 +42484,7 @@ var require_cartesianAxisSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.updateXAxisHeight = _cartesianAxisSlice$a.updateXAxisHeight;
 	exports.cartesianAxisReducer = cartesianAxisSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectChartOffset.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectChartOffset.js
 var require_selectChartOffset = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectChartOffset = void 0;
@@ -42307,7 +42499,7 @@ var require_selectChartOffset = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectPlotArea.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectPlotArea.js
 var require_selectPlotArea = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectPlotArea = void 0;
@@ -42328,7 +42520,7 @@ var require_selectPlotArea = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/hooks.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/hooks.js
 var require_hooks = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useYAxisTicks = exports.useYAxisScale = exports.useYAxisInverseTickSnapScale = exports.useYAxisInverseScale = exports.useYAxisInverseDataSnapScale = exports.useYAxisDomain = exports.useYAxis = exports.useXAxisTicks = exports.useXAxisScale = exports.useXAxisInverseTickSnapScale = exports.useXAxisInverseScale = exports.useXAxisInverseDataSnapScale = exports.useXAxisDomain = exports.useXAxis = exports.usePlotArea = exports.useOffset = exports.useIsTooltipActive = exports.useCartesianScale = exports.useActiveTooltipLabel = exports.useActiveTooltipDataPoints = exports.useActiveTooltipCoordinate = void 0;
@@ -42615,7 +42807,7 @@ var require_hooks = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.useActiveTooltipCoordinate = useActiveTooltipCoordinate;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/component/ActivePoints.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/component/ActivePoints.js
 var require_ActivePoints = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ActivePoints = ActivePoints;
@@ -42732,7 +42924,7 @@ var require_ActivePoints = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/radarSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/radarSelectors.js
 var require_radarSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectRadiusAxisForBandSize = exports.selectRadarPoints = exports.selectAngleAxisWithScaleAndViewport = exports.selectAngleAxisForBandSize = void 0;
@@ -42857,7 +43049,7 @@ var require_radarSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/Radar.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/Radar.js
 var require_Radar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Radar = Radar;
@@ -43247,7 +43439,7 @@ var require_Radar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	Radar.displayName = "Radar";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/RadialBarUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/RadialBarUtils.js
 var require_RadialBarUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RadialBarSector = RadialBarSector;
@@ -43306,7 +43498,7 @@ var require_RadialBarUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineBarSizeList.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineBarSizeList.js
 var require_combineBarSizeList = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineBarSizeList = void 0;
@@ -43390,7 +43582,7 @@ var require_combineBarSizeList = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.combineBarSizeList = combineBarSizeList;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineAllBarPositions.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineAllBarPositions.js
 var require_combineAllBarPositions = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineAllBarPositions = void 0;
@@ -43503,7 +43695,7 @@ var require_combineAllBarPositions = /* @__PURE__ */ __commonJSMin(((exports) =>
 	};
 	exports.combineAllBarPositions = combineAllBarPositions;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineStackedData.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineStackedData.js
 var require_combineStackedData = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineStackedData = void 0;
@@ -43521,7 +43713,7 @@ var require_combineStackedData = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.combineStackedData = combineStackedData;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/combiners/combineBarPosition.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/combiners/combineBarPosition.js
 var require_combineBarPosition = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.combineBarPosition = void 0;
@@ -43533,7 +43725,7 @@ var require_combineBarPosition = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.combineBarPosition = combineBarPosition;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/radialBarSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/radialBarSelectors.js
 var require_radialBarSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectRadiusAxisWithScale = exports.selectRadiusAxisTicks = exports.selectRadialBarSectors = exports.selectRadialBarLegendPayload = exports.selectPolarBarSizeList = exports.selectPolarBarPosition = exports.selectPolarBarBandSize = exports.selectBaseValue = exports.selectBandSizeOfPolarAxis = exports.selectAngleAxisWithScale = exports.selectAllPolarBarPositions = exports.pickMaxBarSize = void 0;
@@ -43769,7 +43961,7 @@ var require_radialBarSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/zIndex/getZIndexFromUnknown.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/zIndex/getZIndexFromUnknown.js
 var require_getZIndexFromUnknown = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getZIndexFromUnknown = getZIndexFromUnknown;
@@ -43779,7 +43971,7 @@ var require_getZIndexFromUnknown = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return defaultZIndex;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/polar/RadialBar.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/polar/RadialBar.js
 var require_RadialBar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RadialBar = RadialBar;
@@ -44228,7 +44420,7 @@ var require_RadialBar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	RadialBar.displayName = "RadialBar";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/CssPrefixUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/CssPrefixUtils.js
 var require_CssPrefixUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.generatePrefixStyle = void 0;
@@ -44290,7 +44482,7 @@ var require_CssPrefixUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.generatePrefixStyle = generatePrefixStyle;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/chartDataContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/chartDataContext.js
 var require_chartDataContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useDataIndex = exports.useChartData = exports.SetComputedData = exports.ChartDataContextProvider = void 0;
@@ -44367,13 +44559,13 @@ var require_chartDataContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.useDataIndex = useDataIndex;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/brushUpdateContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/brushUpdateContext.js
 var require_brushUpdateContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.BrushUpdateDispatchContext = void 0;
 	exports.BrushUpdateDispatchContext = /*#__PURE__*/ (0, require("react").createContext)(() => {});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/brushSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/brushSlice.js
 var require_brushSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.setBrushSettings = exports.brushSlice = exports.brushReducer = void 0;
@@ -44405,7 +44597,7 @@ var require_brushSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.setBrushSettings = brushSlice.actions.setBrushSettings;
 	exports.brushReducer = brushSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/Brush.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/Brush.js
 var require_Brush = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Brush = Brush;
@@ -45092,7 +45284,7 @@ var require_Brush = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	Brush.displayName = "Brush";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/CartesianUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/CartesianUtils.js
 var require_CartesianUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getAngledRectangleWidth = void 0;
@@ -45139,7 +45331,7 @@ var require_CartesianUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return Math.abs(angledWidth);
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/referenceElementsSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/referenceElementsSlice.js
 var require_referenceElementsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.removeLine = exports.removeDot = exports.removeArea = exports.referenceElementsSlice = exports.referenceElementsReducer = exports.addLine = exports.addDot = exports.addArea = void 0;
@@ -45185,7 +45377,7 @@ var require_referenceElementsSlice = /* @__PURE__ */ __commonJSMin(((exports) =>
 	exports.removeLine = _referenceElementsSli.removeLine;
 	exports.referenceElementsReducer = referenceElementsSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/container/ClipPathProvider.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/container/ClipPathProvider.js
 var require_ClipPathProvider = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useClipPathId = exports.ClipPathProvider = void 0;
@@ -45282,7 +45474,7 @@ var require_ClipPathProvider = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.useClipPathId = useClipPathId;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/scale/CartesianScaleHelper.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/scale/CartesianScaleHelper.js
 var require_CartesianScaleHelper = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.CartesianScaleHelperImpl = void 0;
@@ -45327,7 +45519,7 @@ var require_CartesianScaleHelper = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.CartesianScaleHelperImpl = CartesianScaleHelperImpl;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/ReferenceLine.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/ReferenceLine.js
 var require_ReferenceLine = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReferenceLine = ReferenceLine;
@@ -45582,7 +45774,7 @@ var require_ReferenceLine = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	ReferenceLine.displayName = "ReferenceLine";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/ReferenceDot.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/ReferenceDot.js
 var require_ReferenceDot = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReferenceDot = ReferenceDot;
@@ -45772,7 +45964,7 @@ var require_ReferenceDot = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	ReferenceDot.displayName = "ReferenceDot";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/ReferenceArea.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/ReferenceArea.js
 var require_ReferenceArea = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReferenceArea = ReferenceArea;
@@ -46184,7 +46376,7 @@ var require_isEqual$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_isEqual = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_isEqual$1().isEqual;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/getEveryNth.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/getEveryNth.js
 var require_getEveryNth = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getEveryNth = getEveryNth;
@@ -46210,7 +46402,7 @@ var require_getEveryNth = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return result;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/TickUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/TickUtils.js
 var require_TickUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getAngledTickWidth = getAngledTickWidth;
@@ -46247,7 +46439,7 @@ var require_TickUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return (0, _getEveryNth.getEveryNth)(ticks, interval + 1);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/getEquidistantTicks.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/getEquidistantTicks.js
 var require_getEquidistantTicks = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getEquidistantPreserveEndTicks = getEquidistantPreserveEndTicks;
@@ -46329,7 +46521,7 @@ var require_getEquidistantTicks = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return [];
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/getTicks.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/getTicks.js
 var require_getTicks = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getTicks = getTicks;
@@ -46488,7 +46680,7 @@ var require_getTicks = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return candidates.filter((entry) => entry.isShow);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/YAxisUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/YAxisUtils.js
 var require_YAxisUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getCalculatedYAxisWidth = void 0;
@@ -46521,7 +46713,7 @@ var require_YAxisUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.getCalculatedYAxisWidth = getCalculatedYAxisWidth;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/XAxisUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/XAxisUtils.js
 var require_XAxisUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getCalculatedXAxisHeight = void 0;
@@ -46554,7 +46746,7 @@ var require_XAxisUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.getCalculatedXAxisHeight = getCalculatedXAxisHeight;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/renderedTicksSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/renderedTicksSlice.js
 var require_renderedTicksSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.setRenderedTicks = exports.renderedTicksSlice = exports.renderedTicksReducer = exports.removeRenderedTicks = void 0;
@@ -46582,7 +46774,7 @@ var require_renderedTicksSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.removeRenderedTicks = _renderedTicksSlice$a.removeRenderedTicks;
 	exports.renderedTicksReducer = renderedTicksSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/CartesianAxis.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/CartesianAxis.js
 var require_CartesianAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultCartesianAxisProps = exports.CartesianAxis = void 0;
@@ -47096,7 +47288,7 @@ var require_CartesianAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	});
 	CartesianAxis.displayName = "CartesianAxis";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/theme/legacyTheme.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/theme/legacyTheme.js
 var require_legacyTheme = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.legacyTheme = void 0;
@@ -47105,7 +47297,7 @@ var require_legacyTheme = /* @__PURE__ */ __commonJSMin(((exports) => {
 		fill: "none"
 	} };
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/theme/RechartsThemeContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/theme/RechartsThemeContext.js
 var require_RechartsThemeContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useRechartsTheme = exports.RechartsThemeProvider = void 0;
@@ -47121,7 +47313,7 @@ var require_RechartsThemeContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var useRechartsTheme = () => (0, _react.useContext)(RechartsThemeContext);
 	exports.useRechartsTheme = useRechartsTheme;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/CartesianGrid.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/CartesianGrid.js
 var require_CartesianGrid = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.CartesianGrid = CartesianGrid;
@@ -47486,7 +47678,7 @@ var require_CartesianGrid = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	CartesianGrid.displayName = "CartesianGrid";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/LineDrawShape.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/LineDrawShape.js
 var require_LineDrawShape = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.LineDrawShape = LineDrawShape;
@@ -47684,7 +47876,7 @@ var require_LineDrawShape = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/useAnimatedLineLength.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/useAnimatedLineLength.js
 var require_useAnimatedLineLength = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useAnimatedLineLength = useAnimatedLineLength;
@@ -47731,7 +47923,7 @@ var require_useAnimatedLineLength = /* @__PURE__ */ __commonJSMin(((exports) => 
 		}, []);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/errorBarSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/errorBarSlice.js
 var require_errorBarSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.replaceErrorBar = exports.removeErrorBar = exports.errorBarReducer = exports.addErrorBar = void 0;
@@ -47760,7 +47952,7 @@ var require_errorBarSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.removeErrorBar = _errorBarSlice$action.removeErrorBar;
 	exports.errorBarReducer = errorBarSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/context/ErrorBarContext.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/context/ErrorBarContext.js
 var require_ErrorBarContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReportErrorBarSettings = ReportErrorBarSettings;
@@ -47859,7 +48051,7 @@ var require_ErrorBarContext = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/GraphicalItemClipPath.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/GraphicalItemClipPath.js
 var require_GraphicalItemClipPath = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.GraphicalItemClipPath = GraphicalItemClipPath;
@@ -47917,7 +48109,7 @@ var require_GraphicalItemClipPath = /* @__PURE__ */ __commonJSMin(((exports) => 
 		}));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/lineSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/lineSelectors.js
 var require_lineSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectLinePoints = void 0;
@@ -47975,7 +48167,7 @@ var require_lineSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/getRadiusAndStrokeWidthFromDot.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/getRadiusAndStrokeWidthFromDot.js
 var require_getRadiusAndStrokeWidthFromDot = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getRadiusAndStrokeWidthFromDot = getRadiusAndStrokeWidthFromDot;
@@ -48001,7 +48193,7 @@ var require_getRadiusAndStrokeWidthFromDot = /* @__PURE__ */ __commonJSMin(((exp
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/Line.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/Line.js
 var require_Line = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Line = void 0;
@@ -48540,7 +48732,7 @@ var require_Line = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var Line = exports.Line = /*#__PURE__*/ React.memo(LineFn, _propsAreEqual.propsAreEqual);
 	Line.displayName = "Line";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/graphicalItemSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/graphicalItemSelectors.js
 var require_graphicalItemSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectXAxisIdFromGraphicalItemId = selectXAxisIdFromGraphicalItemId;
@@ -48555,7 +48747,7 @@ var require_graphicalItemSelectors = /* @__PURE__ */ __commonJSMin(((exports) =>
 		return (_state$graphicalItems3 = (_state$graphicalItems4 = state.graphicalItems.cartesianItems.find((item) => item.id === id)) === null || _state$graphicalItems4 === void 0 ? void 0 : _state$graphicalItems4.yAxisId) !== null && _state$graphicalItems3 !== void 0 ? _state$graphicalItems3 : _cartesianAxisSlice.defaultAxisId;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/areaSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/areaSelectors.js
 var require_areaSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectGraphicalItemStackedData = exports.selectArea = void 0;
@@ -48647,7 +48839,7 @@ var require_areaSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/AreaRevealShape.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/AreaRevealShape.js
 var require_AreaRevealShape = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AreaRevealShape = AreaRevealShape;
@@ -48836,7 +49028,7 @@ var require_AreaRevealShape = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return /*#__PURE__*/ React.createElement(React.Fragment, null, fillCurve, strokeCurve, baselineCurve);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/Area.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/Area.js
 var require_Area = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Area = void 0;
@@ -49422,7 +49614,7 @@ var require_tiny_invariant_cjs = /* @__PURE__ */ __commonJSMin(((exports, module
 	}
 	module.exports = invariant;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/BarUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/BarUtils.js
 var require_BarUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.BarRectangle = BarRectangle;
@@ -49493,7 +49685,7 @@ var require_BarUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/barSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/barSelectors.js
 var require_barSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectStackedDataOfItem = exports.selectMaxBarSize = exports.selectBarSizeList = exports.selectBarRectangles = exports.selectBarPosition = exports.selectBarCartesianAxisSize = exports.selectBarBandSize = exports.selectAxisBandSize = exports.selectAllVisibleBars = exports.selectAllBarPositions = void 0;
@@ -49657,7 +49849,7 @@ var require_barSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/barStackSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/barStackSelectors.js
 var require_barStackSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectStackRects = exports.selectAllBarsInStack = exports.expandRectangle = void 0;
@@ -49716,7 +49908,7 @@ var require_barStackSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		pickIsPanorama
 	], combineStackRects);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/BarStack.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/BarStack.js
 var require_BarStack = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useStackId = exports.useBarStackClipPathUrl = exports.defaultBarStackProps = exports.BarStackClipLayer = exports.BarStack = void 0;
@@ -49851,7 +50043,7 @@ var require_BarStack = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.BarStack = /*#__PURE__*/ React.memo(BarStackImpl, _propsAreEqual.propsAreEqual);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/Bar.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/Bar.js
 var require_Bar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Bar = void 0;
@@ -50508,7 +50700,7 @@ var require_Bar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var Bar = exports.Bar = /*#__PURE__*/ React.memo(BarFn, _propsAreEqual.propsAreEqual);
 	Bar.displayName = "Bar";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/ScatterUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/ScatterUtils.js
 var require_ScatterUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ScatterSymbol = ScatterSymbol;
@@ -50578,7 +50770,7 @@ var require_ScatterUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/scatterSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/scatterSelectors.js
 var require_scatterSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectScatterPoints = void 0;
@@ -50625,7 +50817,7 @@ var require_scatterSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/Scatter.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/Scatter.js
 var require_Scatter = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Scatter = void 0;
@@ -51198,7 +51390,7 @@ var require_Scatter = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var Scatter = exports.Scatter = /*#__PURE__*/ React.memo(ScatterFn, _propsAreEqual.propsAreEqual);
 	Scatter.displayName = "Scatter";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/axisPropsAreEqual.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/axisPropsAreEqual.js
 var require_axisPropsAreEqual = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.axisPropsAreEqual = axisPropsAreEqual;
@@ -51245,7 +51437,7 @@ var require_axisPropsAreEqual = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return (0, _propsAreEqual.propsAreEqual)(prevRest, nextRest);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/XAxis.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/XAxis.js
 var require_XAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.xAxisDefaultProps = exports.XAxis = void 0;
@@ -51503,7 +51695,7 @@ var require_XAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var XAxis = exports.XAxis = /*#__PURE__*/ React.memo(XAxisSettingsDispatcher, _axisPropsAreEqual.axisPropsAreEqual);
 	XAxis.displayName = "XAxis";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/YAxis.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/YAxis.js
 var require_YAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.yAxisDefaultProps = exports.YAxis = void 0;
@@ -51759,7 +51951,7 @@ var require_YAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var YAxis = exports.YAxis = /*#__PURE__*/ React.memo(YAxisSettingsDispatcher, _axisPropsAreEqual.axisPropsAreEqual);
 	YAxis.displayName = "YAxis";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/ZAxis.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/ZAxis.js
 var require_ZAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ZAxis = ZAxis;
@@ -51839,7 +52031,7 @@ var require_ZAxis = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	ZAxis.displayName = "ZAxis";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/animation/CSSTransitionAnimate.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/animation/CSSTransitionAnimate.js
 var require_CSSTransitionAnimate = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.CSSTransitionAnimate = CSSTransitionAnimate;
@@ -51959,7 +52151,7 @@ var require_CSSTransitionAnimate = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return children({ [attributeName]: from });
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/ErrorBar.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/ErrorBar.js
 var require_ErrorBar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ErrorBar = ErrorBar;
@@ -52283,7 +52475,7 @@ var require_ErrorBar = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	ErrorBar.displayName = "ErrorBar";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/selectActivePropsFromChartPointer.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/selectActivePropsFromChartPointer.js
 var require_selectActivePropsFromChartPointer = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectActivePropsFromChartPointer = void 0;
@@ -52306,7 +52498,7 @@ var require_selectActivePropsFromChartPointer = /* @__PURE__ */ __commonJSMin(((
 		_selectChartOffsetInternal.selectChartOffsetInternal
 	], _selectors.combineActiveProps);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/getRelativeCoordinate.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/getRelativeCoordinate.js
 var require_getRelativeCoordinate = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.getRelativeCoordinate = getRelativeCoordinate;
@@ -52389,7 +52581,7 @@ var require_getRelativeCoordinate = /* @__PURE__ */ __commonJSMin(((exports) => 
 		return getCoordinates(event.clientX, event.clientY);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/mouseEventsMiddleware.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/mouseEventsMiddleware.js
 var require_mouseEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.mouseMoveMiddleware = exports.mouseMoveAction = exports.mouseClickMiddleware = exports.mouseClickAction = void 0;
@@ -52462,7 +52654,7 @@ var require_mouseEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) => 
 		}
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/reduxDevtoolsJsonStringifyReplacer.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/reduxDevtoolsJsonStringifyReplacer.js
 var require_reduxDevtoolsJsonStringifyReplacer = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.reduxDevtoolsJsonStringifyReplacer = reduxDevtoolsJsonStringifyReplacer;
@@ -52473,7 +52665,7 @@ var require_reduxDevtoolsJsonStringifyReplacer = /* @__PURE__ */ __commonJSMin((
 		return value;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/rootPropsSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/rootPropsSlice.js
 var require_rootPropsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.updateOptions = exports.rootPropsReducer = exports.initialState = void 0;
@@ -52516,7 +52708,7 @@ var require_rootPropsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.rootPropsReducer = rootPropsSlice.reducer;
 	exports.updateOptions = rootPropsSlice.actions.updateOptions;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/polarOptionsSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/polarOptionsSlice.js
 var require_polarOptionsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.updatePolarOptions = exports.polarOptionsReducer = void 0;
@@ -52537,7 +52729,7 @@ var require_polarOptionsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.updatePolarOptions = polarOptionsSlice.actions.updatePolarOptions;
 	exports.polarOptionsReducer = polarOptionsSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/keyboardEventsMiddleware.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/keyboardEventsMiddleware.js
 var require_keyboardEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.keyboardEventsMiddleware = exports.keyDownAction = exports.focusAction = exports.blurAction = void 0;
@@ -52686,7 +52878,7 @@ var require_keyboardEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) 
 		}
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/createEventProxy.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/createEventProxy.js
 var require_createEventProxy = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.createEventProxy = createEventProxy;
@@ -52701,7 +52893,7 @@ var require_createEventProxy = /* @__PURE__ */ __commonJSMin(((exports) => {
 		} });
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/externalEventsMiddleware.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/externalEventsMiddleware.js
 var require_externalEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.externalEventsMiddleware = exports.externalEventAction = void 0;
@@ -52775,7 +52967,7 @@ var require_externalEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) 
 		}
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/touchSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/touchSelectors.js
 var require_touchSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectTooltipCoordinate = void 0;
@@ -52797,7 +52989,7 @@ var require_touchSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return getPosition(tooltipIndex);
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/touchEventsMiddleware.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/touchEventsMiddleware.js
 var require_touchEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.touchEventMiddleware = exports.touchEventAction = void 0;
@@ -52898,7 +53090,7 @@ var require_touchEventsMiddleware = /* @__PURE__ */ __commonJSMin(((exports) => 
 		}
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/eventSettingsSlice.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/eventSettingsSlice.js
 var require_eventSettingsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.setEventSettings = exports.initialEventSettingsState = exports.eventSettingsReducer = void 0;
@@ -52925,7 +53117,7 @@ var require_eventSettingsSlice = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.setEventSettings = eventSettingsSlice.actions.setEventSettings;
 	exports.eventSettingsReducer = eventSettingsSlice.reducer;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/store.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/store.js
 var require_store = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.createRechartsStore = void 0;
@@ -53004,7 +53196,7 @@ var require_store = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	};
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/RechartsStoreProvider.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/RechartsStoreProvider.js
 var require_RechartsStoreProvider = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RechartsStoreProvider = RechartsStoreProvider;
@@ -53044,7 +53236,7 @@ var require_RechartsStoreProvider = /* @__PURE__ */ __commonJSMin(((exports) => 
 		}, children);
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/ReportMainChartProps.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/ReportMainChartProps.js
 var require_ReportMainChartProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReportMainChartProps = void 0;
@@ -53076,7 +53268,7 @@ var require_ReportMainChartProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	exports.ReportMainChartProps = /*#__PURE__*/ (0, _react.memo)(ReportMainChartPropsImpl, _propsAreEqual.propsAreEqual);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/ReportChartProps.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/ReportChartProps.js
 var require_ReportChartProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReportChartProps = ReportChartProps;
@@ -53091,7 +53283,7 @@ var require_ReportChartProps = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/ReportEventSettings.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/ReportEventSettings.js
 var require_ReportEventSettings = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReportEventSettings = void 0;
@@ -53108,7 +53300,7 @@ var require_ReportEventSettings = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.ReportEventSettings = /*#__PURE__*/ (0, _react.memo)(ReportEventSettingsImpl, _propsAreEqual.propsAreEqual);
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/zIndex/ZIndexPortal.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/zIndex/ZIndexPortal.js
 var require_ZIndexPortal = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AllZIndexPortals = AllZIndexPortals;
@@ -53178,7 +53370,7 @@ var require_ZIndexPortal = /* @__PURE__ */ __commonJSMin(((exports) => {
 		})));
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/container/RootSurface.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/container/RootSurface.js
 var require_RootSurface = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RootSurface = void 0;
@@ -53284,7 +53476,7 @@ var require_RootSurface = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return /*#__PURE__*/ React.createElement(MainChartSurface, _extends({ ref }, rest), /*#__PURE__*/ React.createElement(_ZIndexPortal.AllZIndexPortals, { isPanorama: false }, children));
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/useReportScale.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/useReportScale.js
 var require_useReportScale = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.useReportScale = useReportScale;
@@ -53351,7 +53543,7 @@ var require_useReportScale = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return setRef;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/RechartsWrapper.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/RechartsWrapper.js
 var require_RechartsWrapper = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RechartsWrapper = void 0;
@@ -53729,7 +53921,7 @@ var require_RechartsWrapper = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}, /*#__PURE__*/ React.createElement(EventSynchronizer, null), children)));
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/CategoricalChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/CategoricalChart.js
 var require_CategoricalChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.CategoricalChart = void 0;
@@ -53822,7 +54014,7 @@ var require_CategoricalChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}, /*#__PURE__*/ React.createElement(_ClipPathProvider.ClipPathProvider, null, children)));
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/CartesianChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/CartesianChart.js
 var require_CartesianChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultCartesianChartProps = exports.CartesianChart = void 0;
@@ -53956,7 +54148,7 @@ var require_CartesianChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}), /*#__PURE__*/ React.createElement(_CategoricalChart.CategoricalChart, _extends({}, rootChartProps, { ref })));
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/LineChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/LineChart.js
 var require_LineChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.LineChart = void 0;
@@ -53993,7 +54185,7 @@ var require_LineChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/BarChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/BarChart.js
 var require_BarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.BarChart = void 0;
@@ -54030,7 +54222,7 @@ var require_BarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/ReportPolarOptions.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/ReportPolarOptions.js
 var require_ReportPolarOptions = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ReportPolarOptions = ReportPolarOptions;
@@ -54045,7 +54237,7 @@ var require_ReportPolarOptions = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return null;
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/PolarChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/PolarChart.js
 var require_PolarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultPolarChartProps = exports.PolarChart = void 0;
@@ -54214,7 +54406,7 @@ var require_PolarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}), /*#__PURE__*/ React.createElement(_CategoricalChart.CategoricalChart, _extends({}, otherCategoricalProps, { ref })));
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/PieChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/PieChart.js
 var require_PieChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultPieChartProps = exports.PieChart = void 0;
@@ -54746,7 +54938,7 @@ var require_omit$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_omit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_omit$1().omit;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/Treemap.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/Treemap.js
 var require_Treemap = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Treemap = Treemap;
@@ -55575,7 +55767,7 @@ var require_sumBy$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_sumBy = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_sumBy$1().sumBy;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/Sankey.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/Sankey.js
 var require_Sankey = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Sankey = Sankey;
@@ -56502,7 +56694,7 @@ var require_Sankey = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	Sankey.displayName = "Sankey";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/RadarChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/RadarChart.js
 var require_RadarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultRadarChartProps = exports.RadarChart = void 0;
@@ -56589,7 +56781,7 @@ var require_RadarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/ScatterChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/ScatterChart.js
 var require_ScatterChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ScatterChart = void 0;
@@ -56626,7 +56818,7 @@ var require_ScatterChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/AreaChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/AreaChart.js
 var require_AreaChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AreaChart = void 0;
@@ -56663,7 +56855,7 @@ var require_AreaChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/RadialBarChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/RadialBarChart.js
 var require_RadialBarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultRadialBarChartProps = exports.RadialBarChart = void 0;
@@ -56750,7 +56942,7 @@ var require_RadialBarChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/ComposedChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/ComposedChart.js
 var require_ComposedChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ComposedChart = void 0;
@@ -56787,7 +56979,7 @@ var require_ComposedChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/SunburstChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/SunburstChart.js
 var require_SunburstChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.payloadSearcher = exports.defaultSunburstChartProps = exports.SunburstChart = void 0;
@@ -57150,7 +57342,7 @@ var require_SunburstChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.SunburstChart = SunburstChart;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/shape/Trapezoid.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/shape/Trapezoid.js
 var require_Trapezoid = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.defaultTrapezoidProps = exports.Trapezoid = void 0;
@@ -57393,7 +57585,7 @@ var require_Trapezoid = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.Trapezoid = Trapezoid;
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/FunnelUtils.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/FunnelUtils.js
 var require_FunnelUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.FunnelTrapezoid = FunnelTrapezoid;
@@ -57447,7 +57639,7 @@ var require_FunnelUtils = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/state/selectors/funnelSelectors.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/state/selectors/funnelSelectors.js
 var require_funnelSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.selectFunnelTrapezoids = void 0;
@@ -57525,7 +57717,7 @@ var require_funnelSelectors = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/cartesian/Funnel.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/cartesian/Funnel.js
 var require_Funnel = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Funnel = void 0;
@@ -58034,7 +58226,7 @@ var require_Funnel = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var Funnel = exports.Funnel = FunnelFn;
 	Funnel.displayName = "Funnel";
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/chart/FunnelChart.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/chart/FunnelChart.js
 var require_FunnelChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.FunnelChart = void 0;
@@ -58071,7 +58263,7 @@ var require_FunnelChart = /* @__PURE__ */ __commonJSMin(((exports) => {
 		});
 	});
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/createCartesianCharts.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/createCartesianCharts.js
 var require_createCartesianCharts = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.createHorizontalChart = createHorizontalChart;
@@ -58236,7 +58428,7 @@ var require_createCartesianCharts = /* @__PURE__ */ __commonJSMin(((exports) => 
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/util/createPolarCharts.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/util/createPolarCharts.js
 var require_createPolarCharts = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.createCentricChart = createCentricChart;
@@ -58388,7 +58580,7 @@ var require_createPolarCharts = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	}
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/theme/darkTheme.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/theme/darkTheme.js
 var require_darkTheme = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.darkTheme = void 0;
@@ -58397,7 +58589,7 @@ var require_darkTheme = /* @__PURE__ */ __commonJSMin(((exports) => {
 		fill: "none"
 	} };
 }));
-// node_modules/.pnpm/recharts@3.10.1_@types+reac_03d7fd3e041007ecf189d459b6096abc/node_modules/recharts/lib/theme/lightTheme.js
+// node_modules/.pnpm/recharts@3.10.1_@types+react@19.3.0_react-dom@18.3.1_react@18.3.1__react-is@19.3.1_react@18.3.1_redux@5.0.1/node_modules/recharts/lib/theme/lightTheme.js
 var require_lightTheme = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.lightTheme = void 0;
@@ -60253,8 +60445,8 @@ function GraphNodeCard(t0) {
 				label: "overviewStatusRunning",
 				tone: "info"
 			},
-			waiting: {
-				label: "overviewStatusWaiting",
+			idle: {
+				label: "ticketStatusIdle",
 				tone: "quiet"
 			},
 			queued: {
@@ -60270,6 +60462,10 @@ function GraphNodeCard(t0) {
 				tone: "danger"
 			},
 			done: {
+				label: "graphDone",
+				tone: "success"
+			},
+			completed: {
 				label: "graphDone",
 				tone: "success"
 			},
@@ -60933,7 +61129,7 @@ function GraphCanvas(t0) {
 					/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("span", { children: [t(selected.label), selected.subtitle ? ` · ${selected.subtitle}` : ""] }),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 						className: "text-(--dsw-alias-label-tertiary)",
-						children: t(selected.status === "not_created" ? "graphNotCreated" : selected.status === "queued" ? "graphQueued" : selected.status === "running" ? "graphRunning" : selected.status === "background" ? "graphBackground" : selected.status === "done" ? "graphDone" : selected.status === "cancelled" ? "graphCancelled" : selected.status === "waiting" ? "overviewStatusWaiting" : selected.status === "review" ? "overviewStatusReview" : selected.status === "paused" ? "ticketStatusPaused" : selected.status === "error" ? "overviewStatusIntervention" : "graphIdle")
+						children: t(selected.status === "not_created" ? "graphNotCreated" : selected.status === "queued" ? "graphQueued" : selected.status === "running" ? "graphRunning" : selected.status === "background" ? "graphBackground" : selected.status === "done" ? "graphDone" : selected.status === "cancelled" ? "graphCancelled" : selected.status === "idle" ? "ticketStatusIdle" : selected.status === "review" ? "overviewStatusReview" : selected.status === "completed" ? "graphDone" : selected.status === "paused" ? "ticketStatusPaused" : selected.status === "error" ? "overviewStatusIntervention" : "graphIdle")
 					}),
 					selected.sessionId && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 						size: "sm",
@@ -61227,7 +61423,7 @@ function _temp$19() {
 }
 // src/client/pages/ticket/components/row.tsx
 function Row$1(t0) {
-	const $ = (0, import_dist.c)(108);
+	const $ = (0, import_dist.c)(112);
 	const { task, nodes, channels, triggers, subscriptions, refreshedAt } = t0;
 	const { t } = useTranslation();
 	const { openTicket } = useActions();
@@ -61276,10 +61472,6 @@ function Row$1(t0) {
 	let t9;
 	if ($[10] !== refreshedAt || $[11] !== subscriptions || $[12] !== t || $[13] !== task.endedAt || $[14] !== task.id || $[15] !== task.paused || $[16] !== task.prState || $[17] !== task.prUrl || $[18] !== task.prepareError || $[19] !== task.startedAt || $[20] !== task.status || $[21] !== task.title || $[22] !== triggers) {
 		const status = {
-			waiting: {
-				label: "overviewStatusWaiting",
-				tone: "quiet"
-			},
 			queued: {
 				label: "ticketStatusQueued",
 				tone: "quiet"
@@ -61287,6 +61479,10 @@ function Row$1(t0) {
 			running: {
 				label: "overviewStatusRunning",
 				tone: "info"
+			},
+			idle: {
+				label: "ticketStatusIdle",
+				tone: "quiet"
 			},
 			review: {
 				label: "overviewStatusReview",
@@ -61296,58 +61492,74 @@ function Row$1(t0) {
 				label: "overviewCompleted",
 				tone: "success"
 			},
+			completed: {
+				label: "overviewCompleted",
+				tone: "success"
+			},
 			cancelled: {
 				label: "ticketStatusCancelled",
 				tone: "quiet"
 			}
 		};
-		intervention = Boolean(task.prepareError || task.paused) && task.status !== "done" && task.status !== "cancelled";
 		let t11;
-		if ($[36] !== subscriptions || $[37] !== task.id || $[38] !== triggers) {
-			let t12;
-			if ($[40] !== task.id) {
-				t12 = (subscription) => subscription.ticketId === task.id;
-				$[40] = task.id;
-				$[41] = t12;
-			} else t12 = $[41];
-			const ticketSubscriptions = subscriptions.filter(t12);
-			t11 = triggers.filter((trigger) => ticketSubscriptions.some((subscription_0) => subscription_0.threadId === trigger.threadId)).toSorted(_temp2$11);
-			$[36] = subscriptions;
-			$[37] = task.id;
-			$[38] = triggers;
+		if ($[36] !== task.paused || $[37] !== task.prepareError || $[38] !== task.status) {
+			t11 = Boolean(task.prepareError || task.paused) && ![
+				"done",
+				"completed",
+				"cancelled"
+			].includes(task.status);
+			$[36] = task.paused;
+			$[37] = task.prepareError;
+			$[38] = task.status;
 			$[39] = t11;
 		} else t11 = $[39];
-		const trigger_0 = t11[0];
-		prUrl = task.prUrl && /^https?:\/\//i.test(task.prUrl) ? task.prUrl : null;
+		intervention = t11;
 		let t12;
-		if ($[42] !== prUrl) {
-			t12 = prUrl?.match(/\/(?:pull|merge_requests)\/(\d+)(?:[/?#]|$)/)?.[1];
-			$[42] = prUrl;
+		if ($[40] !== subscriptions || $[41] !== task.id || $[42] !== triggers) {
+			let t13;
+			if ($[44] !== task.id) {
+				t13 = (subscription) => subscription.ticketId === task.id;
+				$[44] = task.id;
+				$[45] = t13;
+			} else t13 = $[45];
+			const ticketSubscriptions = subscriptions.filter(t13);
+			t12 = triggers.filter((trigger) => ticketSubscriptions.some((subscription_0) => subscription_0.threadId === trigger.threadId)).toSorted(_temp2$11);
+			$[40] = subscriptions;
+			$[41] = task.id;
+			$[42] = triggers;
 			$[43] = t12;
 		} else t12 = $[43];
-		const prNumber = t12;
+		const trigger_0 = t12[0];
+		prUrl = task.prUrl && /^https?:\/\//i.test(task.prUrl) ? task.prUrl : null;
 		let t13;
-		if ($[44] !== prNumber || $[45] !== task.prState || $[46] !== trigger_0) {
-			t13 = prNumber ? `PR #${prNumber}${task.prState ? ` ${task.prState}` : ""}` : trigger_0 ? `${trigger_0.ref ?? ""} ${trigger_0.kind}`.trim() : null;
-			$[44] = prNumber;
-			$[45] = task.prState;
-			$[46] = trigger_0;
+		if ($[46] !== prUrl) {
+			t13 = prUrl?.match(/\/(?:pull|merge_requests)\/(\d+)(?:[/?#]|$)/)?.[1];
+			$[46] = prUrl;
 			$[47] = t13;
 		} else t13 = $[47];
-		event = t13;
-		const start = task.status === "waiting" ? null : task.startedAt;
+		const prNumber = t13;
+		let t14;
+		if ($[48] !== prNumber || $[49] !== task.prState || $[50] !== trigger_0) {
+			t14 = prNumber ? `PR #${prNumber}${task.prState ? ` ${task.prState}` : ""}` : trigger_0 ? `${trigger_0.ref ?? ""} ${trigger_0.kind}`.trim() : null;
+			$[48] = prNumber;
+			$[49] = task.prState;
+			$[50] = trigger_0;
+			$[51] = t14;
+		} else t14 = $[51];
+		event = t14;
+		const start = task.status === "queued" ? null : task.startedAt;
 		const end = task.endedAt ?? (start ? refreshedAt : null);
 		const seconds = start && end ? Math.max(0, Math.floor((Date.parse(end) - Date.parse(start)) / 1e3)) : NaN;
-		let t14;
-		if ($[48] !== seconds) {
-			t14 = Number.isFinite(seconds) ? `${seconds >= 3600 ? `${Math.floor(seconds / 3600)}h ` : ""}${seconds >= 60 ? `${Math.floor(seconds / 60) % 60}m ` : ""}${seconds % 60}s` : null;
-			$[48] = seconds;
-			$[49] = t14;
-		} else t14 = $[49];
-		duration = t14;
+		let t15;
+		if ($[52] !== seconds) {
+			t15 = Number.isFinite(seconds) ? `${seconds >= 3600 ? `${Math.floor(seconds / 3600)}h ` : ""}${seconds >= 60 ? `${Math.floor(seconds / 60) % 60}m ` : ""}${seconds % 60}s` : null;
+			$[52] = seconds;
+			$[53] = t15;
+		} else t15 = $[53];
+		duration = t15;
 		t10 = "flex flex-col gap-3 border-b border-(--dsw-alias-border-l3) py-5 last:border-b-0 @min-[640px]:flex-row @min-[640px]:items-center @min-[640px]:justify-between @min-[640px]:gap-5";
 		t8 = "flex min-w-0 items-start gap-3";
-		if ($[50] === Symbol.for("react.memo_cache_sentinel")) {
+		if ($[54] === Symbol.for("react.memo_cache_sentinel")) {
 			t9 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 				className: "mt-0.5 text-(--dsw-alias-label-tertiary)",
 				children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(TasksIcon, {
@@ -61355,27 +61567,27 @@ function Row$1(t0) {
 					height: 17
 				})
 			});
-			$[50] = t9;
-		} else t9 = $[50];
+			$[54] = t9;
+		} else t9 = $[54];
 		t6 = "min-w-0";
-		let t15;
-		if ($[51] !== task.id) {
-			t15 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+		let t16;
+		if ($[55] !== task.id) {
+			t16 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 				className: "mr-2 text-xs font-normal text-(--dsw-alias-label-tertiary)",
 				children: task.id
 			});
-			$[51] = task.id;
-			$[52] = t15;
-		} else t15 = $[52];
-		if ($[53] !== t15 || $[54] !== task.title) {
+			$[55] = task.id;
+			$[56] = t16;
+		} else t16 = $[56];
+		if ($[57] !== t16 || $[58] !== task.title) {
 			t7 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("h3", {
 				className: "text-[13px] leading-5 font-medium [overflow-wrap:anywhere] m-0",
-				children: [t15, task.title]
+				children: [t16, task.title]
 			});
-			$[53] = t15;
-			$[54] = task.title;
-			$[55] = t7;
-		} else t7 = $[55];
+			$[57] = t16;
+			$[58] = task.title;
+			$[59] = t7;
+		} else t7 = $[59];
 		t5 = "mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs leading-5 text-(--dsw-alias-label-secondary)";
 		T0 = _deepseek_ai_dsh_client_ui_primitives.Tag;
 		t3 = intervention ? "danger" : status[task.status].tone;
@@ -61422,124 +61634,124 @@ function Row$1(t0) {
 		t9 = $[35];
 	}
 	let t11;
-	if ($[56] !== T0 || $[57] !== t3 || $[58] !== t4) {
+	if ($[60] !== T0 || $[61] !== t3 || $[62] !== t4) {
 		t11 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(T0, {
 			tone: t3,
 			children: t4
 		});
-		$[56] = T0;
-		$[57] = t3;
-		$[58] = t4;
-		$[59] = t11;
-	} else t11 = $[59];
+		$[60] = T0;
+		$[61] = t3;
+		$[62] = t4;
+		$[63] = t11;
+	} else t11 = $[63];
 	let t12;
-	if ($[60] !== channel_0?.name || $[61] !== duration || $[62] !== event || $[63] !== intervention || $[64] !== session?.status || $[65] !== t || $[66] !== task.channelId || $[67] !== task.prepareError || $[68] !== task.status) {
+	if ($[64] !== channel_0?.name || $[65] !== duration || $[66] !== event || $[67] !== intervention || $[68] !== session?.status || $[69] !== t || $[70] !== task.channelId || $[71] !== task.prepareError || $[72] !== task.status) {
 		t12 = intervention ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: task.prepareError ?? t("ticketStatusPaused") }) : /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [
 			/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: `${t("overviewSource")}: ${channel_0?.name ?? task.channelId}` }),
 			event && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 				"aria-hidden": "true",
 				children: "·"
 			}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: event })] }),
-			task.status === "waiting" && session?.status === "running" && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+			task.status === "idle" && session?.status === "running" && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 				"aria-hidden": "true",
 				children: "·"
 			}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: t("overviewTriggerRunning") })] }),
-			(duration || task.status === "waiting") && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
+			(duration || task.status === "queued") && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", {
 				"aria-hidden": "true",
 				children: "·"
-			}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: `${t(task.status === "waiting" ? "ticketWaitDuration" : "ticketExecutionDuration")}: ${duration ?? t("ticketDurationUnknown")}` })] })
+			}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: `${t(task.status === "queued" ? "ticketWaitDuration" : "ticketExecutionDuration")}: ${duration ?? t("ticketDurationUnknown")}` })] })
 		] });
-		$[60] = channel_0?.name;
-		$[61] = duration;
-		$[62] = event;
-		$[63] = intervention;
-		$[64] = session?.status;
-		$[65] = t;
-		$[66] = task.channelId;
-		$[67] = task.prepareError;
-		$[68] = task.status;
-		$[69] = t12;
-	} else t12 = $[69];
+		$[64] = channel_0?.name;
+		$[65] = duration;
+		$[66] = event;
+		$[67] = intervention;
+		$[68] = session?.status;
+		$[69] = t;
+		$[70] = task.channelId;
+		$[71] = task.prepareError;
+		$[72] = task.status;
+		$[73] = t12;
+	} else t12 = $[73];
 	let t13;
-	if ($[70] !== t11 || $[71] !== t12 || $[72] !== t5) {
+	if ($[74] !== t11 || $[75] !== t12 || $[76] !== t5) {
 		t13 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 			className: t5,
 			children: [t11, t12]
 		});
-		$[70] = t11;
-		$[71] = t12;
-		$[72] = t5;
-		$[73] = t13;
-	} else t13 = $[73];
+		$[74] = t11;
+		$[75] = t12;
+		$[76] = t5;
+		$[77] = t13;
+	} else t13 = $[77];
 	let t14;
-	if ($[74] !== t13 || $[75] !== t6 || $[76] !== t7) {
+	if ($[78] !== t13 || $[79] !== t6 || $[80] !== t7) {
 		t14 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 			className: t6,
 			children: [t7, t13]
 		});
-		$[74] = t13;
-		$[75] = t6;
-		$[76] = t7;
-		$[77] = t14;
-	} else t14 = $[77];
+		$[78] = t13;
+		$[79] = t6;
+		$[80] = t7;
+		$[81] = t14;
+	} else t14 = $[81];
 	let t15;
-	if ($[78] !== t14 || $[79] !== t8 || $[80] !== t9) {
+	if ($[82] !== t14 || $[83] !== t8 || $[84] !== t9) {
 		t15 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 			className: t8,
 			children: [t9, t14]
 		});
-		$[78] = t14;
-		$[79] = t8;
-		$[80] = t9;
-		$[81] = t15;
-	} else t15 = $[81];
+		$[82] = t14;
+		$[83] = t8;
+		$[84] = t9;
+		$[85] = t15;
+	} else t15 = $[85];
 	let t16;
-	if ($[82] !== prUrl || $[83] !== t) {
+	if ($[86] !== prUrl || $[87] !== t) {
 		t16 = prUrl && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 			size: "sm",
 			variant: "outline",
 			onClick: () => window.open(prUrl, "_blank", "noopener,noreferrer"),
 			children: t("overviewOpenPr")
 		});
-		$[82] = prUrl;
-		$[83] = t;
-		$[84] = t16;
-	} else t16 = $[84];
+		$[86] = prUrl;
+		$[87] = t;
+		$[88] = t16;
+	} else t16 = $[88];
 	let t17;
-	if ($[85] !== ctx || $[86] !== session || $[87] !== t) {
+	if ($[89] !== ctx || $[90] !== session || $[91] !== t) {
 		t17 = session?.sessionId && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 			size: "sm",
 			variant: "outline",
 			onClick: () => ctx.uiWorkspace.openSession(session.sessionId),
 			children: t("overviewOpenSession")
 		});
-		$[85] = ctx;
-		$[86] = session;
-		$[87] = t;
-		$[88] = t17;
-	} else t17 = $[88];
+		$[89] = ctx;
+		$[90] = session;
+		$[91] = t;
+		$[92] = t17;
+	} else t17 = $[92];
 	let t18;
-	if ($[89] !== t) {
+	if ($[93] !== t) {
 		t18 = t("overviewOpenDetails");
-		$[89] = t;
-		$[90] = t18;
-	} else t18 = $[90];
+		$[93] = t;
+		$[94] = t18;
+	} else t18 = $[94];
 	const t19 = `${t18} ${task.id}`;
 	let t20;
-	if ($[91] !== openTicket || $[92] !== task.id) {
+	if ($[95] !== openTicket || $[96] !== task.id) {
 		t20 = () => openTicket(task.id);
-		$[91] = openTicket;
-		$[92] = task.id;
-		$[93] = t20;
-	} else t20 = $[93];
+		$[95] = openTicket;
+		$[96] = task.id;
+		$[97] = t20;
+	} else t20 = $[97];
 	let t21;
-	if ($[94] !== t) {
+	if ($[98] !== t) {
 		t21 = t("overviewOpenDetails");
-		$[94] = t;
-		$[95] = t21;
-	} else t21 = $[95];
+		$[98] = t;
+		$[99] = t21;
+	} else t21 = $[99];
 	let t22;
-	if ($[96] !== t19 || $[97] !== t20 || $[98] !== t21) {
+	if ($[100] !== t19 || $[101] !== t20 || $[102] !== t21) {
 		t22 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 			size: "sm",
 			variant: "primary",
@@ -61547,13 +61759,13 @@ function Row$1(t0) {
 			onClick: t20,
 			children: t21
 		});
-		$[96] = t19;
-		$[97] = t20;
-		$[98] = t21;
-		$[99] = t22;
-	} else t22 = $[99];
+		$[100] = t19;
+		$[101] = t20;
+		$[102] = t21;
+		$[103] = t22;
+	} else t22 = $[103];
 	let t23;
-	if ($[100] !== t16 || $[101] !== t17 || $[102] !== t22) {
+	if ($[104] !== t16 || $[105] !== t17 || $[106] !== t22) {
 		t23 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 			className: "flex shrink-0 flex-wrap items-center gap-2 pl-[29px] @min-[640px]:pl-0",
 			children: [
@@ -61562,22 +61774,22 @@ function Row$1(t0) {
 				t22
 			]
 		});
-		$[100] = t16;
-		$[101] = t17;
-		$[102] = t22;
-		$[103] = t23;
-	} else t23 = $[103];
+		$[104] = t16;
+		$[105] = t17;
+		$[106] = t22;
+		$[107] = t23;
+	} else t23 = $[107];
 	let t24;
-	if ($[104] !== t10 || $[105] !== t15 || $[106] !== t23) {
+	if ($[108] !== t10 || $[109] !== t15 || $[110] !== t23) {
 		t24 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("li", {
 			className: t10,
 			children: [t15, t23]
 		});
-		$[104] = t10;
-		$[105] = t15;
-		$[106] = t23;
-		$[107] = t24;
-	} else t24 = $[107];
+		$[108] = t10;
+		$[109] = t15;
+		$[110] = t23;
+		$[111] = t24;
+	} else t24 = $[111];
 	return t24;
 }
 function _temp2$11(a, b) {
@@ -62270,18 +62482,28 @@ const LIMITS = {
 		max: 3600
 	}
 };
+const INFERRED_MODES = [
+	"off",
+	"observe",
+	"auto"
+];
 function administratorSignature(administrators) {
 	return [...new Set(administrators.join(",").split(/[,\s]+/).filter(Boolean).map((name) => name.toLowerCase()))].sort().join(",");
 }
 function validSettings(settings) {
-	return Array.isArray(settings.administrators) && settings.administrators.length <= 100 && settings.administrators.every((name) => typeof name === "string" && /^[a-z0-9][\w.-]{0,254}$/i.test(name.trim())) && typeof settings.autoMerge === "boolean" && typeof settings.autoArchiveWorkers === "boolean" && Object.entries(LIMITS).every(([key, limits]) => {
+	return Array.isArray(settings.administrators) && settings.administrators.length <= 100 && settings.administrators.every((name) => typeof name === "string" && /^[a-z0-9][\w.-]{0,254}$/i.test(name.trim())) && INFERRED_MODES.includes(settings.inferred) && typeof settings.autoMerge === "boolean" && typeof settings.autoArchiveWorkers === "boolean" && Object.entries(LIMITS).every(([key, limits]) => {
 		const value = settings[key];
 		return Number.isInteger(value) && value >= limits.min && value <= limits.max;
 	});
 }
 // src/client/pages/setting/components/general.tsx
+const INFERRED_LABELS = {
+	off: "settingInferredOff",
+	observe: "settingInferredObserve",
+	auto: "settingInferredAuto"
+};
 function General(t0) {
-	const $ = (0, import_dist.c)(104);
+	const $ = (0, import_dist.c)(132);
 	const { value, baseline, pending, failed, onChange, onDiscard, onSave } = t0;
 	const { t } = useTranslation();
 	const id = (0, react.useId)();
@@ -62303,105 +62525,109 @@ function General(t0) {
 	}
 	const valid = t1;
 	let t2;
-	if ($[4] !== baseline.administrators || $[5] !== baseline.autoArchiveWorkers || $[6] !== value.administrators || $[7] !== value.autoArchiveWorkers) {
-		t2 = administratorSignature(value.administrators) !== administratorSignature(baseline.administrators) || value.autoArchiveWorkers !== baseline.autoArchiveWorkers;
+	if ($[4] !== baseline.administrators || $[5] !== baseline.autoArchiveWorkers || $[6] !== baseline.inferred || $[7] !== value.administrators || $[8] !== value.autoArchiveWorkers || $[9] !== value.inferred) {
+		t2 = administratorSignature(value.administrators) !== administratorSignature(baseline.administrators) || value.inferred !== baseline.inferred || value.autoArchiveWorkers !== baseline.autoArchiveWorkers;
 		$[4] = baseline.administrators;
 		$[5] = baseline.autoArchiveWorkers;
-		$[6] = value.administrators;
-		$[7] = value.autoArchiveWorkers;
-		$[8] = t2;
-	} else t2 = $[8];
+		$[6] = baseline.inferred;
+		$[7] = value.administrators;
+		$[8] = value.autoArchiveWorkers;
+		$[9] = value.inferred;
+		$[10] = t2;
+	} else t2 = $[10];
 	const dirty = t2;
 	const t3 = `${id}-title`;
 	let t4;
-	if ($[9] !== dirty || $[10] !== names || $[11] !== onSave || $[12] !== pending || $[13] !== valid || $[14] !== value.autoArchiveWorkers) {
+	if ($[11] !== dirty || $[12] !== names || $[13] !== onSave || $[14] !== pending || $[15] !== valid || $[16] !== value.autoArchiveWorkers || $[17] !== value.inferred) {
 		t4 = (event) => {
 			event.preventDefault();
 			if (dirty && valid && !pending) onSave({
 				administrators: names,
+				inferred: value.inferred,
 				autoArchiveWorkers: value.autoArchiveWorkers
 			});
 		};
-		$[9] = dirty;
-		$[10] = names;
-		$[11] = onSave;
-		$[12] = pending;
-		$[13] = valid;
-		$[14] = value.autoArchiveWorkers;
-		$[15] = t4;
-	} else t4 = $[15];
+		$[11] = dirty;
+		$[12] = names;
+		$[13] = onSave;
+		$[14] = pending;
+		$[15] = valid;
+		$[16] = value.autoArchiveWorkers;
+		$[17] = value.inferred;
+		$[18] = t4;
+	} else t4 = $[18];
 	const t5 = `${id}-title`;
 	let t6;
-	if ($[16] !== t) {
+	if ($[19] !== t) {
 		t6 = t("settingGeneral");
-		$[16] = t;
-		$[17] = t6;
-	} else t6 = $[17];
+		$[19] = t;
+		$[20] = t6;
+	} else t6 = $[20];
 	let t7;
-	if ($[18] !== t5 || $[19] !== t6) {
+	if ($[21] !== t5 || $[22] !== t6) {
 		t7 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("h3", {
 			id: t5,
 			className: "m-0 text-sm font-medium",
 			children: t6
 		});
-		$[18] = t5;
-		$[19] = t6;
-		$[20] = t7;
-	} else t7 = $[20];
+		$[21] = t5;
+		$[22] = t6;
+		$[23] = t7;
+	} else t7 = $[23];
 	let t8;
-	if ($[21] !== t) {
+	if ($[24] !== t) {
 		t8 = t("settingGeneralDescription");
-		$[21] = t;
-		$[22] = t8;
-	} else t8 = $[22];
+		$[24] = t;
+		$[25] = t8;
+	} else t8 = $[25];
 	let t9;
-	if ($[23] !== t8) {
+	if ($[26] !== t8) {
 		t9 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 			className: "m-0 mt-1.5 text-xs leading-5 text-(--dsw-alias-label-secondary)",
 			children: t8
 		});
-		$[23] = t8;
-		$[24] = t9;
-	} else t9 = $[24];
+		$[26] = t8;
+		$[27] = t9;
+	} else t9 = $[27];
 	let t10;
-	if ($[25] !== t7 || $[26] !== t9) {
+	if ($[28] !== t7 || $[29] !== t9) {
 		t10 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("header", {
 			className: "px-4 py-3",
 			children: [t7, t9]
 		});
-		$[25] = t7;
-		$[26] = t9;
-		$[27] = t10;
-	} else t10 = $[27];
+		$[28] = t7;
+		$[29] = t9;
+		$[30] = t10;
+	} else t10 = $[30];
 	const t11 = `${id}-administrators`;
 	let t12;
-	if ($[28] !== t) {
+	if ($[31] !== t) {
 		t12 = t("settingAdministrators");
-		$[28] = t;
-		$[29] = t12;
-	} else t12 = $[29];
+		$[31] = t;
+		$[32] = t12;
+	} else t12 = $[32];
 	let t13;
-	if ($[30] !== t11 || $[31] !== t12) {
+	if ($[33] !== t11 || $[34] !== t12) {
 		t13 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("label", {
 			htmlFor: t11,
 			className: "text-xs font-medium",
 			children: t12
 		});
-		$[30] = t11;
-		$[31] = t12;
-		$[32] = t13;
-	} else t13 = $[32];
+		$[33] = t11;
+		$[34] = t12;
+		$[35] = t13;
+	} else t13 = $[35];
 	const t14 = `${id}-administrators`;
 	let t15;
-	if ($[33] !== onChange) {
+	if ($[36] !== onChange) {
 		t15 = (event_0) => onChange({ administrators: event_0.target.value.split(",") });
-		$[33] = onChange;
-		$[34] = t15;
-	} else t15 = $[34];
+		$[36] = onChange;
+		$[37] = t15;
+	} else t15 = $[37];
 	const t16 = !valid;
 	const t17 = `${id}-help`;
 	let t18;
-	if ($[35] !== administrators || $[36] !== pending || $[37] !== t14 || $[38] !== t15 || $[39] !== t16 || $[40] !== t17) {
+	if ($[38] !== administrators || $[39] !== pending || $[40] !== t14 || $[41] !== t15 || $[42] !== t16 || $[43] !== t17) {
 		t18 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Input, {
 			id: t14,
 			value: administrators,
@@ -62412,56 +62638,56 @@ function General(t0) {
 			"aria-invalid": t16,
 			"aria-describedby": t17
 		});
-		$[35] = administrators;
-		$[36] = pending;
-		$[37] = t14;
-		$[38] = t15;
-		$[39] = t16;
-		$[40] = t17;
-		$[41] = t18;
-	} else t18 = $[41];
+		$[38] = administrators;
+		$[39] = pending;
+		$[40] = t14;
+		$[41] = t15;
+		$[42] = t16;
+		$[43] = t17;
+		$[44] = t18;
+	} else t18 = $[44];
 	const t19 = `${id}-help`;
 	let t20;
-	if ($[42] !== t) {
+	if ($[45] !== t) {
 		t20 = t("settingAdministratorsHelp");
-		$[42] = t;
-		$[43] = t20;
-	} else t20 = $[43];
+		$[45] = t;
+		$[46] = t20;
+	} else t20 = $[46];
 	let t21;
-	if ($[44] !== t19 || $[45] !== t20) {
+	if ($[47] !== t19 || $[48] !== t20) {
 		t21 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 			id: t19,
 			className: "m-0 text-xs leading-5 text-(--dsw-alias-label-secondary)",
 			children: t20
 		});
-		$[44] = t19;
-		$[45] = t20;
-		$[46] = t21;
-	} else t21 = $[46];
+		$[47] = t19;
+		$[48] = t20;
+		$[49] = t21;
+	} else t21 = $[49];
 	let t22;
-	if ($[47] !== t || $[48] !== valid) {
+	if ($[50] !== t || $[51] !== valid) {
 		t22 = !valid && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 			role: "alert",
 			className: "m-0 text-xs text-(--dsw-alias-state-error-primary)",
 			children: t("settingAdministratorsInvalid")
 		});
-		$[47] = t;
-		$[48] = valid;
-		$[49] = t22;
-	} else t22 = $[49];
+		$[50] = t;
+		$[51] = valid;
+		$[52] = t22;
+	} else t22 = $[52];
 	let t23;
-	if ($[50] !== failed || $[51] !== t) {
+	if ($[53] !== failed || $[54] !== t) {
 		t23 = failed && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 			role: "alert",
 			className: "m-0 text-xs text-(--dsw-alias-state-error-primary)",
 			children: t("settingGeneralSaveFailed")
 		});
-		$[50] = failed;
-		$[51] = t;
-		$[52] = t23;
-	} else t23 = $[52];
+		$[53] = failed;
+		$[54] = t;
+		$[55] = t23;
+	} else t23 = $[55];
 	let t24;
-	if ($[53] !== t13 || $[54] !== t18 || $[55] !== t21 || $[56] !== t22 || $[57] !== t23) {
+	if ($[56] !== t13 || $[57] !== t18 || $[58] !== t21 || $[59] !== t22 || $[60] !== t23) {
 		t24 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 			className: "flex flex-col gap-2 border-t border-(--dsw-alias-border-l3) px-4 py-3",
 			children: [
@@ -62472,172 +62698,258 @@ function General(t0) {
 				t23
 			]
 		});
-		$[53] = t13;
-		$[54] = t18;
-		$[55] = t21;
-		$[56] = t22;
-		$[57] = t23;
-		$[58] = t24;
-	} else t24 = $[58];
+		$[56] = t13;
+		$[57] = t18;
+		$[58] = t21;
+		$[59] = t22;
+		$[60] = t23;
+		$[61] = t24;
+	} else t24 = $[61];
 	let t25;
-	if ($[59] !== t) {
-		t25 = t("settingAutoArchiveWorkers");
-		$[59] = t;
-		$[60] = t25;
-	} else t25 = $[60];
+	if ($[62] !== t) {
+		t25 = t("settingInferred");
+		$[62] = t;
+		$[63] = t25;
+	} else t25 = $[63];
 	let t26;
-	if ($[61] !== t25) {
+	if ($[64] !== t25) {
 		t26 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("h4", {
 			className: "m-0 text-xs font-medium",
 			children: t25
 		});
-		$[61] = t25;
-		$[62] = t26;
-	} else t26 = $[62];
+		$[64] = t25;
+		$[65] = t26;
+	} else t26 = $[65];
 	let t27;
-	if ($[63] !== t) {
-		t27 = t("settingAutoArchiveWorkersHelp");
-		$[63] = t;
-		$[64] = t27;
-	} else t27 = $[64];
+	if ($[66] !== t) {
+		t27 = t("settingInferredHelp");
+		$[66] = t;
+		$[67] = t27;
+	} else t27 = $[67];
 	let t28;
-	if ($[65] !== t27) {
+	if ($[68] !== t27) {
 		t28 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
 			className: "m-0 mt-1.5 max-w-lg text-xs leading-5 text-(--dsw-alias-label-secondary)",
 			children: t27
 		});
-		$[65] = t27;
-		$[66] = t28;
-	} else t28 = $[66];
+		$[68] = t27;
+		$[69] = t28;
+	} else t28 = $[69];
 	let t29;
-	if ($[67] !== t26 || $[68] !== t28) {
+	if ($[70] !== t26 || $[71] !== t28) {
 		t29 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 			className: "min-w-0",
 			children: [t26, t28]
 		});
-		$[67] = t26;
-		$[68] = t28;
-		$[69] = t29;
-	} else t29 = $[69];
-	const t30 = value.autoArchiveWorkers;
+		$[70] = t26;
+		$[71] = t28;
+		$[72] = t29;
+	} else t29 = $[72];
+	let t30;
+	if ($[73] !== t) {
+		t30 = t("settingInferred");
+		$[73] = t;
+		$[74] = t30;
+	} else t30 = $[74];
 	let t31;
-	if ($[70] !== t) {
-		t31 = t("settingAutoArchiveWorkers");
-		$[70] = t;
-		$[71] = t31;
-	} else t31 = $[71];
-	let t32;
-	if ($[72] !== onChange) {
-		t32 = (autoArchiveWorkers) => onChange({ autoArchiveWorkers });
-		$[72] = onChange;
-		$[73] = t32;
-	} else t32 = $[73];
-	let t33;
-	if ($[74] !== pending || $[75] !== t31 || $[76] !== t32 || $[77] !== value.autoArchiveWorkers) {
-		t33 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Switch, {
+	if ($[75] !== onChange || $[76] !== pending || $[77] !== t || $[78] !== value.inferred) {
+		t31 = INFERRED_MODES.map((mode) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+			type: "button",
+			"aria-pressed": value.inferred === mode,
 			disabled: pending,
-			checked: t30,
-			label: t31,
-			onChange: t32
+			onClick: () => onChange({ inferred: mode }),
+			className: `cursor-pointer rounded-md border-0 px-2.5 py-1.5 font-[inherit] text-xs outline-none transition-colors focus-visible:outline-2 focus-visible:outline-(--dsw-alias-state-business-primary) ${value.inferred === mode ? "bg-(--dsw-alias-bg-layer-1) font-medium text-(--dsw-alias-label-primary)" : "bg-transparent text-(--dsw-alias-label-secondary) hover:bg-(--dsw-alias-bg-layer-1)"}`,
+			children: t(INFERRED_LABELS[mode])
+		}, mode));
+		$[75] = onChange;
+		$[76] = pending;
+		$[77] = t;
+		$[78] = value.inferred;
+		$[79] = t31;
+	} else t31 = $[79];
+	let t32;
+	if ($[80] !== t30 || $[81] !== t31) {
+		t32 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+			role: "group",
+			"aria-label": t30,
+			className: "flex shrink-0 gap-1 rounded-lg bg-(--dsw-alias-card-fill) p-1",
+			children: t31
 		});
-		$[74] = pending;
-		$[75] = t31;
-		$[76] = t32;
-		$[77] = value.autoArchiveWorkers;
-		$[78] = t33;
-	} else t33 = $[78];
-	let t34;
-	if ($[79] !== t29 || $[80] !== t33) {
-		t34 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+		$[80] = t30;
+		$[81] = t31;
+		$[82] = t32;
+	} else t32 = $[82];
+	let t33;
+	if ($[83] !== t29 || $[84] !== t32) {
+		t33 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 			className: "flex items-start justify-between gap-5 border-t border-(--dsw-alias-border-l3) px-4 py-3",
-			children: [t29, t33]
+			children: [t29, t32]
 		});
-		$[79] = t29;
-		$[80] = t33;
-		$[81] = t34;
-	} else t34 = $[81];
-	const t35 = pending || !dirty;
+		$[83] = t29;
+		$[84] = t32;
+		$[85] = t33;
+	} else t33 = $[85];
+	let t34;
+	if ($[86] !== t) {
+		t34 = t("settingAutoArchiveWorkers");
+		$[86] = t;
+		$[87] = t34;
+	} else t34 = $[87];
+	let t35;
+	if ($[88] !== t34) {
+		t35 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("h4", {
+			className: "m-0 text-xs font-medium",
+			children: t34
+		});
+		$[88] = t34;
+		$[89] = t35;
+	} else t35 = $[89];
 	let t36;
-	if ($[82] !== t) {
-		t36 = t("settingDiscard");
-		$[82] = t;
-		$[83] = t36;
-	} else t36 = $[83];
+	if ($[90] !== t) {
+		t36 = t("settingAutoArchiveWorkersHelp");
+		$[90] = t;
+		$[91] = t36;
+	} else t36 = $[91];
 	let t37;
-	if ($[84] !== onDiscard || $[85] !== t35 || $[86] !== t36) {
-		t37 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+	if ($[92] !== t36) {
+		t37 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
+			className: "m-0 mt-1.5 max-w-lg text-xs leading-5 text-(--dsw-alias-label-secondary)",
+			children: t36
+		});
+		$[92] = t36;
+		$[93] = t37;
+	} else t37 = $[93];
+	let t38;
+	if ($[94] !== t35 || $[95] !== t37) {
+		t38 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+			className: "min-w-0",
+			children: [t35, t37]
+		});
+		$[94] = t35;
+		$[95] = t37;
+		$[96] = t38;
+	} else t38 = $[96];
+	const t39 = value.autoArchiveWorkers;
+	let t40;
+	if ($[97] !== t) {
+		t40 = t("settingAutoArchiveWorkers");
+		$[97] = t;
+		$[98] = t40;
+	} else t40 = $[98];
+	let t41;
+	if ($[99] !== onChange) {
+		t41 = (autoArchiveWorkers) => onChange({ autoArchiveWorkers });
+		$[99] = onChange;
+		$[100] = t41;
+	} else t41 = $[100];
+	let t42;
+	if ($[101] !== pending || $[102] !== t40 || $[103] !== t41 || $[104] !== value.autoArchiveWorkers) {
+		t42 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Switch, {
+			disabled: pending,
+			checked: t39,
+			label: t40,
+			onChange: t41
+		});
+		$[101] = pending;
+		$[102] = t40;
+		$[103] = t41;
+		$[104] = value.autoArchiveWorkers;
+		$[105] = t42;
+	} else t42 = $[105];
+	let t43;
+	if ($[106] !== t38 || $[107] !== t42) {
+		t43 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+			className: "flex items-start justify-between gap-5 border-t border-(--dsw-alias-border-l3) px-4 py-3",
+			children: [t38, t42]
+		});
+		$[106] = t38;
+		$[107] = t42;
+		$[108] = t43;
+	} else t43 = $[108];
+	const t44 = pending || !dirty;
+	let t45;
+	if ($[109] !== t) {
+		t45 = t("settingDiscard");
+		$[109] = t;
+		$[110] = t45;
+	} else t45 = $[110];
+	let t46;
+	if ($[111] !== onDiscard || $[112] !== t44 || $[113] !== t45) {
+		t46 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 			type: "button",
 			size: "sm",
 			variant: "ghost",
-			disabled: t35,
+			disabled: t44,
 			onClick: onDiscard,
-			children: t36
+			children: t45
 		});
-		$[84] = onDiscard;
-		$[85] = t35;
-		$[86] = t36;
-		$[87] = t37;
-	} else t37 = $[87];
-	const t38 = pending || !dirty || !valid;
-	const t39 = pending ? "channelSaving" : "settingSave";
-	let t40;
-	if ($[88] !== t || $[89] !== t39) {
-		t40 = t(t39);
-		$[88] = t;
-		$[89] = t39;
-		$[90] = t40;
-	} else t40 = $[90];
-	let t41;
-	if ($[91] !== t38 || $[92] !== t40) {
-		t41 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+		$[111] = onDiscard;
+		$[112] = t44;
+		$[113] = t45;
+		$[114] = t46;
+	} else t46 = $[114];
+	const t47 = pending || !dirty || !valid;
+	const t48 = pending ? "channelSaving" : "settingSave";
+	let t49;
+	if ($[115] !== t || $[116] !== t48) {
+		t49 = t(t48);
+		$[115] = t;
+		$[116] = t48;
+		$[117] = t49;
+	} else t49 = $[117];
+	let t50;
+	if ($[118] !== t47 || $[119] !== t49) {
+		t50 = /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 			type: "submit",
 			size: "sm",
 			variant: "primary",
-			disabled: t38,
-			children: t40
+			disabled: t47,
+			children: t49
 		});
-		$[91] = t38;
-		$[92] = t40;
-		$[93] = t41;
-	} else t41 = $[93];
-	let t42;
-	if ($[94] !== t37 || $[95] !== t41) {
-		t42 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("footer", {
+		$[118] = t47;
+		$[119] = t49;
+		$[120] = t50;
+	} else t50 = $[120];
+	let t51;
+	if ($[121] !== t46 || $[122] !== t50) {
+		t51 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("footer", {
 			className: "flex flex-wrap items-center justify-end gap-2 border-t border-(--dsw-alias-border-l3) bg-(--dsw-alias-card-fill) px-4 py-2.5",
-			children: [t37, t41]
+			children: [t46, t50]
 		});
-		$[94] = t37;
-		$[95] = t41;
-		$[96] = t42;
-	} else t42 = $[96];
-	let t43;
-	if ($[97] !== t10 || $[98] !== t24 || $[99] !== t3 || $[100] !== t34 || $[101] !== t4 || $[102] !== t42) {
-		t43 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("form", {
+		$[121] = t46;
+		$[122] = t50;
+		$[123] = t51;
+	} else t51 = $[123];
+	let t52;
+	if ($[124] !== t10 || $[125] !== t24 || $[126] !== t3 || $[127] !== t33 || $[128] !== t4 || $[129] !== t43 || $[130] !== t51) {
+		t52 = /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("form", {
 			className: "overflow-hidden rounded-2xl border border-(--dsw-alias-border-l3) bg-(--dsw-alias-bg-layer-1)",
 			"aria-labelledby": t3,
 			onSubmit: t4,
 			children: [
 				t10,
 				t24,
-				t34,
-				t42
+				t33,
+				t43,
+				t51
 			]
 		});
-		$[97] = t10;
-		$[98] = t24;
-		$[99] = t3;
-		$[100] = t34;
-		$[101] = t4;
-		$[102] = t42;
-		$[103] = t43;
-	} else t43 = $[103];
-	return t43;
+		$[124] = t10;
+		$[125] = t24;
+		$[126] = t3;
+		$[127] = t33;
+		$[128] = t4;
+		$[129] = t43;
+		$[130] = t51;
+		$[131] = t52;
+	} else t52 = $[131];
+	return t52;
 }
 function _temp$15(name) {
 	return /^[a-z0-9][\w.-]{0,254}$/i.test(name);
 }
 // src/utils/repository.ts
-function parseGitRemote(value) {
+function parseGitRemote(value, site) {
 	const invalid = () => /* @__PURE__ */ new Error("invalid_repository_remote");
 	if (typeof value !== "string" || !value || value !== value.trim() || /[\s\\%]/.test(value)) throw invalid();
 	const scp = /^git@([^/:]+):(.+)$/.exec(value);
@@ -62647,19 +62959,34 @@ function parseGitRemote(value) {
 	} catch {
 		throw invalid();
 	}
-	if (!["https:", "ssh:"].includes(url.protocol) || !url.hostname || url.password || url.search || url.hash || (url.protocol === "https:" ? Boolean(url.username) : url.username !== "git" || Boolean(url.port))) throw invalid();
+	if (![
+		"http:",
+		"https:",
+		"ssh:"
+	].includes(url.protocol) || !url.hostname || url.password || url.search || url.hash) throw invalid();
+	if (url.protocol === "ssh:" ? url.username !== "git" || Boolean(url.port) : Boolean(url.username) || url.hostname === "github.com" && (url.protocol !== "https:" || Boolean(url.port))) throw invalid();
 	const segments = (scp ? scp[2] : value.slice(value.indexOf("://") + 3).replace(/^[^/]+\//, "")).replace(/\/$/, "").replace(/\.git$/, "").split("/");
 	if (segments.length < 2 || !segments.every((segment) => /^\w[\w.-]*$/.test(segment) && !segment.endsWith(".") && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment))) throw invalid();
 	const owner = segments.slice(0, -1).join("/");
 	const name = segments.at(-1);
-	const webUrl = `https://${url.host}/${segments.join("/")}`;
+	const webUrl = `${webProtocol(site, url.host, url.protocol)}//${url.host}/${segments.join("/")}`;
 	return {
 		host: url.host,
 		owner,
 		name,
-		remoteUrl: url.protocol === "https:" ? `${webUrl}.git` : `git@${url.hostname}:${segments.join("/")}.git`,
+		remoteUrl: url.protocol === "ssh:" ? `git@${url.hostname}:${segments.join("/")}.git` : `${webUrl}.git`,
 		webUrl
 	};
+}
+/** ssh 远端没有网页协议，按渠道配置的站点协议归一；站点不是同一台主机时退回 https。 */
+function webProtocol(site, host, protocol) {
+	if (protocol !== "ssh:" || !site) return protocol;
+	try {
+		const configured = new URL(site);
+		return configured.host === host && configured.protocol === "http:" ? "http:" : "https:";
+	} catch {
+		return "https:";
+	}
 }
 function parseRepositoryRemote(value, gitlabHost = "https://gitlab.com") {
 	const invalid = () => /* @__PURE__ */ new Error("invalid_repository_remote");
@@ -62669,8 +62996,8 @@ function parseRepositoryRemote(value, gitlabHost = "https://gitlab.com") {
 	} catch {
 		throw invalid();
 	}
-	if (configured.protocol !== "https:" || configured.username || configured.password || configured.pathname !== "/" || configured.search || configured.hash) throw invalid();
-	const remote = parseGitRemote(value);
+	if (!["http:", "https:"].includes(configured.protocol) || configured.username || configured.password || configured.pathname !== "/" || configured.search || configured.hash) throw invalid();
+	const remote = parseGitRemote(value, gitlabHost);
 	const platform = remote.host === "github.com" ? "github" : remote.host === configured.host ? "gitlab" : null;
 	if (!platform || platform === "github" && remote.owner.includes("/")) throw invalid();
 	return {
@@ -62830,6 +63157,34 @@ function AddRepository() {
 	] });
 }
 // src/client/pages/setting/components/projects.tsx
+const COLLECTION_REASONS = {
+	repository_mismatch: "settingCollectionReasonRepositoryMismatch",
+	invalid_channel_host: "settingCollectionReasonInvalidHost",
+	not_logged_in: "settingCollectionReasonNotLoggedIn",
+	forbidden: "settingCollectionReasonForbidden",
+	not_found: "settingCollectionReasonNotFound",
+	rate_limited: "settingCollectionReasonRateLimited",
+	channel_disabled: "settingCollectionReasonChannelDisabled",
+	unknown_repository: "settingCollectionReasonUnknownRepository",
+	account_mismatch: "settingCollectionReasonAccountMismatch",
+	environment_identity_changed: "settingCollectionReasonIdentityChanged",
+	invalid_response: "settingCollectionReasonInvalidResponse",
+	remote_rejected: "settingCollectionReasonRemoteRejected"
+};
+function collectionReason(t, code) {
+	if (code.startsWith("transport_unknown")) return t("settingCollectionReasonTransport");
+	const key = COLLECTION_REASONS[code];
+	return key ? t(key) : code;
+}
+/** 网络抖动和中断是暂时的，不该当成采集失败长期挂在项目上。 */
+function transient(code) {
+	return code.startsWith("transport_unknown") || code === "interrupted";
+}
+function collectionFailure(collection) {
+	if (collection.ok) return [];
+	const reasons = collection.reasons.filter((code) => !transient(code));
+	return [...new Set(reasons)];
+}
 function Projects({ onNotice }) {
 	const { t } = useTranslation();
 	const client = useQueryClient();
@@ -62986,15 +63341,25 @@ function Projects({ onNotice }) {
 								})
 							}), /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
 								className: "min-w-0 pt-0.5",
-								children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
-									className: "truncate text-[13px] leading-5 font-medium text-(--dsw-alias-label-primary)",
-									children: project_4.name
-								}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
-									id: pathId,
-									className: "m-0 mt-1 truncate font-mono text-[11px] leading-5 text-(--dsw-alias-label-tertiary)",
-									title: project_4.repository.webUrl,
-									children: `${project_4.repository.platform}:${project_4.repository.owner}/${project_4.repository.name}`
-								})]
+								children: [
+									/* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
+										className: "truncate text-[13px] leading-5 font-medium text-(--dsw-alias-label-primary)",
+										children: project_4.name
+									}),
+									/* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
+										id: pathId,
+										className: "m-0 mt-1 truncate font-mono text-[11px] leading-5 text-(--dsw-alias-label-tertiary)",
+										title: project_4.repository.webUrl,
+										children: `${project_4.repository.platform}:${project_4.repository.owner}/${project_4.repository.name}`
+									}),
+									project_4.collection && (project_4.collection.ok || collectionFailure(project_4.collection).length > 0) && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("p", {
+										className: `m-0 mt-0.5 truncate text-[11px] leading-5 ${project_4.collection.ok ? "text-(--dsw-alias-label-tertiary)" : "text-(--dsw-alias-state-error-primary)"}`,
+										children: project_4.collection.ok ? t("settingCollectionOk", { time: new Date(project_4.collection.collectedAt).toLocaleTimeString() }) : t("settingCollectionFailed", {
+											reasons: collectionFailure(project_4.collection).map((code) => collectionReason(t, code)).join("、"),
+											time: new Date(project_4.collection.collectedAt).toLocaleTimeString()
+										})
+									})
+								]
 							})]
 						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("div", {
 							className: "ml-auto flex shrink-0 items-center gap-2",
@@ -63411,9 +63776,10 @@ const NUMERIC = [
 	"deliveryRetryCeilingSeconds"
 ];
 function toRuntime(value) {
-	const { administrators, maxWorkers, backgroundLimitMinutes, autoMerge, autoMergeMaxLines, autoArchiveWorkers, deliveryMaxAttempts, deliveryRetryCeilingSeconds } = value;
+	const { administrators, inferred, maxWorkers, backgroundLimitMinutes, autoMerge, autoMergeMaxLines, autoArchiveWorkers, deliveryMaxAttempts, deliveryRetryCeilingSeconds } = value;
 	return {
 		administrators,
+		inferred,
 		maxWorkers,
 		backgroundLimitMinutes,
 		autoMerge,
@@ -63424,7 +63790,7 @@ function toRuntime(value) {
 	};
 }
 function sameSettings(left, right) {
-	return administratorSignature(left.administrators) === administratorSignature(right.administrators) && NUMERIC.every((key) => left[key] === right[key]);
+	return administratorSignature(left.administrators) === administratorSignature(right.administrators) && left.inferred === right.inferred && NUMERIC.every((key) => left[key] === right[key]);
 }
 function numbersValid(value) {
 	return Object.entries(LIMITS).every(([key, limits]) => {
@@ -63527,6 +63893,7 @@ function Setting() {
 			setDraft((current_1) => current_1 && (section === "general" ? {
 				...current_1,
 				administrators: [...baseline.administrators],
+				inferred: baseline.inferred,
 				autoArchiveWorkers: baseline.autoArchiveWorkers
 			} : {
 				...current_1,
@@ -63565,7 +63932,7 @@ function Setting() {
 	const dirtyOf = t10;
 	let t11;
 	if ($[20] !== baseline || $[21] !== draft) {
-		t11 = draft !== null && baseline !== null && (administratorSignature(draft.administrators) !== administratorSignature(baseline.administrators) || draft.autoArchiveWorkers !== baseline.autoArchiveWorkers);
+		t11 = draft !== null && baseline !== null && (administratorSignature(draft.administrators) !== administratorSignature(baseline.administrators) || draft.inferred !== baseline.inferred || draft.autoArchiveWorkers !== baseline.autoArchiveWorkers);
 		$[20] = baseline;
 		$[21] = draft;
 		$[22] = t11;
@@ -64479,11 +64846,12 @@ function Relations(t0) {
 		t3 = Symbol.for("react.early_return_sentinel");
 		bb0: {
 			const statusLabels = {
-				waiting: "overviewStatusWaiting",
 				queued: "ticketStatusQueued",
 				running: "overviewStatusRunning",
+				idle: "ticketStatusIdle",
 				review: "overviewStatusReview",
 				done: "overviewCompleted",
+				completed: "overviewCompleted",
 				cancelled: "ticketStatusCancelled"
 			};
 			if (error) {
@@ -64521,8 +64889,12 @@ function Relations(t0) {
 								children: task_0.title
 							})]
 						}), task_0 && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Tag, {
-							tone: task_0.prepareError ? "danger" : task_0.status === "done" ? "success" : task_0.status === "review" ? "warning" : task_0.status === "running" ? "info" : "quiet",
-							children: task_0.paused && task_0.status !== "done" && task_0.status !== "cancelled" ? t("ticketStatusPaused") : t(statusLabels[task_0.status])
+							tone: task_0.prepareError ? "danger" : ["done", "completed"].includes(task_0.status) ? "success" : task_0.status === "review" ? "warning" : task_0.status === "running" ? "info" : "quiet",
+							children: task_0.paused && ![
+								"done",
+								"completed",
+								"cancelled"
+							].includes(task_0.status) ? t("ticketStatusPaused") : t(statusLabels[task_0.status])
 						})]
 					}, link.ticketId + link.relatedId + link.kind);
 				})
@@ -64693,7 +65065,7 @@ function TicketDetail() {
 	const channel_0 = t13;
 	let t14;
 	if ($[29] !== task) {
-		t14 = task?.status !== "waiting" && task?.startedAt ? Math.max(0, Math.floor((new Date(task.endedAt ?? /* @__PURE__ */ new Date()).getTime() - new Date(task.startedAt).getTime()) / 1e3)) : null;
+		t14 = task?.status !== "queued" && task?.startedAt ? Math.max(0, Math.floor((new Date(task.endedAt ?? /* @__PURE__ */ new Date()).getTime() - new Date(task.startedAt).getTime()) / 1e3)) : null;
 		$[29] = task;
 		$[30] = t14;
 	} else t14 = $[30];
@@ -64730,14 +65102,19 @@ function TicketDetail() {
 	let t24;
 	if ($[38] !== cancel.isPending || $[39] !== channel_0 || $[40] !== ctx || $[41] !== detail || $[42] !== error || $[43] !== go || $[44] !== isLoading || $[45] !== latest || $[46] !== pause || $[47] !== returnTo || $[48] !== seconds || $[49] !== supervisors || $[50] !== t || $[51] !== task || $[52] !== unavailable) {
 		const statusLabels = {
-			waiting: "overviewStatusWaiting",
 			queued: "ticketStatusQueued",
 			running: "overviewStatusRunning",
+			idle: "ticketStatusIdle",
 			review: "overviewStatusReview",
 			done: "overviewCompleted",
+			completed: "overviewCompleted",
 			cancelled: "ticketStatusCancelled"
 		};
-		const attention = Boolean(task?.prepareError || task?.paused) && task?.status !== "done" && task?.status !== "cancelled";
+		const attention = Boolean(task && (task.prepareError || task.paused) && ![
+			"done",
+			"completed",
+			"cancelled"
+		].includes(task.status));
 		t18 = "@container flex min-w-0 flex-col gap-5 pb-10";
 		if ($[60] !== t) {
 			t19 = t("ticketDetail");
@@ -64821,7 +65198,7 @@ function TicketDetail() {
 							className: "text-xs text-(--dsw-alias-label-tertiary)",
 							children: task.id
 						}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Tag, {
-							tone: attention ? "danger" : task.status === "done" ? "success" : task.status === "running" ? "info" : task.status === "review" ? "warning" : "quiet",
+							tone: attention ? "danger" : ["done", "completed"].includes(task.status) ? "success" : task.status === "running" ? "info" : task.status === "review" ? "warning" : "quiet",
 							children: attention ? t(task.paused ? "ticketStatusPaused" : "overviewStatusIntervention") : t(statusLabels[task.status])
 						})]
 					}), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("h2", {
@@ -64834,7 +65211,11 @@ function TicketDetail() {
 						className: "flex flex-wrap items-center justify-end gap-2",
 						children: [
 							/* @__PURE__ */ (0, react_jsx_runtime.jsx)(PrStatus, { ticket: task }),
-							task.status !== "done" && task.status !== "cancelled" && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
+							![
+								"done",
+								"completed",
+								"cancelled"
+							].includes(task.status) && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Button, {
 								variant: "outline",
 								size: "sm",
 								disabled: pause.isPending,
@@ -64903,7 +65284,7 @@ function TicketDetail() {
 						})]
 					}),
 					/* @__PURE__ */ (0, react_jsx_runtime.jsx)(Metric, {
-						label: t(task.status === "waiting" ? "ticketWaitDuration" : "ticketExecutionDuration"),
+						label: t(task.status === "queued" ? "ticketWaitDuration" : "ticketExecutionDuration"),
 						icon: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(ActivityIcon, {
 							width: 17,
 							height: 17
@@ -68278,6 +68659,7 @@ const store = (0, _deepseek_ai_dsh_client_store.defineStore)({
 	init: () => {
 		const saved = {
 			administrators: [],
+			inferred: "observe",
 			maxWorkers: 10,
 			backgroundLimitMinutes: 30,
 			autoMerge: false,
@@ -68598,11 +68980,17 @@ function _temp$1(block) {
 	return block.type === "text";
 }
 // src/client/ui/mailbox/panel.tsx
+/** 事件只是「可能变了」的信号：合并成一次请求，避免流式输出时把 mailbox 打成刷屏。 */
+const REFRESH_DELAY_MS = 250;
 function Panel({ sessionId }) {
 	const ctx = useDshContext();
 	const { t } = useTranslation();
 	const [collapsed, setCollapsed] = (0, react.useState)(true);
 	const listId = (0, react.useId)();
+	const managed = useQuery({
+		queryKey: keys.sessionRole,
+		queryFn: () => getApiSupermeshSessionRole()
+	}).data?.sessions.some((session) => session.sessionId === sessionId) === true;
 	const { state: mailbox, execute, error: error_0 } = useAsyncState(async (signal) => {
 		try {
 			const { mailbox: result } = await getApiSupermeshSessionIdMailbox({ id: sessionId }, { signal });
@@ -68616,28 +69004,46 @@ function Panel({ sessionId }) {
 		resetOnExecute: false
 	});
 	(0, react.useEffect)(() => {
+		if (!managed) return;
 		const reference = ctx.sessions.retain(sessionId, { source: "supermeshMailbox" });
 		const events = reference.binding.eventSource;
-		let request;
+		const controller = new AbortController();
+		let timer;
+		let running = false;
+		let queued = false;
 		const refresh = () => {
-			request?.abort();
-			request = new AbortController();
-			execute(0, request.signal);
+			if (running) {
+				queued = true;
+				return;
+			}
+			running = true;
+			execute(0, controller.signal).catch(() => void 0).finally(() => {
+				running = false;
+				if (queued && !controller.signal.aborted) {
+					queued = false;
+					timer = setTimeout(refresh, REFRESH_DELAY_MS);
+				}
+			});
+		};
+		const schedule = () => {
+			timer ??= setTimeout(refresh, REFRESH_DELAY_MS);
 		};
 		const unsubscribe = events.subscribe(() => {
 			const { change } = events.getSnapshot();
-			if (change.kind === "settle-assistant" || change.entries.some((entry) => entry.type === "event")) refresh();
+			if (change.kind === "settle-assistant" || change.entries.some((entry) => entry.type === "event")) schedule();
 		});
 		refresh();
 		return () => {
 			unsubscribe();
-			request.abort();
+			if (timer) clearTimeout(timer);
+			controller.abort();
 			reference.release();
 		};
 	}, [
 		ctx.sessions,
 		sessionId,
-		execute
+		execute,
+		managed
 	]);
 	if (error_0 || mailbox?.sessionId !== sessionId || mailbox.pendingCount === 0 || mailbox.messages.length === 0) return null;
 	return /* @__PURE__ */ (0, react_jsx_runtime.jsx)("section", {
@@ -68836,13 +69242,16 @@ function apply(ctx) {
 		id: "supermesh-mailbox",
 		order: 1,
 		locale: NS
-	}, (props) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)(PluginContext.Provider, {
-		value: {
-			ctx,
-			t: props.t
-		},
-		children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Panel, { sessionId: props.sessionId })
-	}, props.sessionId)));
+	}, (props) => /* @__PURE__ */ (0, react_jsx_runtime.jsx)(QueryClientProvider, {
+		client,
+		children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(PluginContext.Provider, {
+			value: {
+				ctx,
+				t: props.t
+			},
+			children: /* @__PURE__ */ (0, react_jsx_runtime.jsx)(Panel, { sessionId: props.sessionId })
+		}, props.sessionId)
+	})));
 	ctx.slots.inject("sidebar.session.row.leading", () => ctx.slots.register({
 		name: "sidebar.session.row.leading",
 		id: `${PANEL_ID}:role-icon`,

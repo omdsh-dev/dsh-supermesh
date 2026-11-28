@@ -76,7 +76,7 @@ async function start() {
     ['dsh-session-projection', {}],
     ['dsh-agent', {}],
     ['dsh-tools', {}],
-    ['dsh-tool-executor-native', {}],
+    ['dsh-tool-registry-native', {}],
     ['dsh-system-prompt', {}],
     ['dsh-agent-loop', {}],
     ['dsh-typert-registry', {}],

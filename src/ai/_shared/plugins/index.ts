@@ -135,9 +135,9 @@ export const toolWeb: PresetPlugin = {
   config: { fetch: true, searchTimeoutMs: 60000 },
 }
 
-export const toolExecutorPtc: PresetPlugin = {
-  id: 'tool-executor-ptc',
-  name: '@deepseek-ai/dsh-tool-executor-ptc',
+export const toolRegistryPtc: PresetPlugin = {
+  id: 'tool-registry-ptc',
+  name: '@deepseek-ai/dsh-tool-registry-ptc',
 }
 
 export const toolPresent: PresetPlugin = {
