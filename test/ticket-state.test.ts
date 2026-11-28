@@ -28,6 +28,10 @@ beforeEach(async () => {
     { id: 'T-002', projectId: 'p1', channelId: 'github', title: 'done', description: null, status: 'done', createdAt: at, updatedAt: at, startedAt: null, endedAt: at, prUrl: null, prState: null, ciState: null, paused: 0, prepareError: null },
     { id: 'T-003', projectId: 'p1', channelId: 'github', title: 'queued', description: null, status: 'queued', createdAt: at, updatedAt: at, startedAt: null, endedAt: null, prUrl: null, prState: null, ciState: null, paused: 0, prepareError: null },
   ]).execute()
+  await connection.insertInto('thread').values([
+    { id: 'github:1', channelId: 'github', projectId: 'p1', refId: 'owner/repo:1', kind: 'issue', title: 'cancelled source', url: 'https://github.com/owner/repo/issues/1', createdAt: at, updatedAt: at, triage: 'claimed', triagedAt: at },
+    { id: 'github:2', channelId: 'github', projectId: 'p1', refId: 'owner/repo:2', kind: 'issue', title: 'live source', url: 'https://github.com/owner/repo/issues/2', createdAt: at, updatedAt: at, triage: 'claimed', triagedAt: at },
+  ]).execute()
 })
 afterEach(async () => connection.destroy())
 
@@ -62,6 +66,21 @@ describe('人新的 @ 唤醒票', () => {
   it('人叫停的票保持结束', async () => {
     expect(await ticket.revive('T-001', later)).toBe(false)
     expect((await ticket.findById('T-001'))?.status).toBe('cancelled')
+  })
+})
+
+describe('话题上的重复建票', () => {
+  it('人叫停的票不占话题，同一话题可以另开一张', async () => {
+    await connection.insertInto('ticket_thread').values({ ticketId: 'T-001', threadId: 'github:1', createdAt: at }).execute()
+    const created = await ticket.createWithThreads('p1', '重新开工', ['github:1'])
+    expect(created).toMatchObject({ status: 'queued', title: '重新开工' })
+    expect(await connection.selectFrom('ticket_thread').select('ticketId').where('threadId', '=', 'github:1').orderBy('createdAt').execute()).toEqual([{ ticketId: 'T-001' }, { ticketId: created.id }])
+  })
+
+  it('还活着的票挡住重复建票，并说明是哪一张', async () => {
+    await connection.insertInto('ticket_thread').values({ ticketId: 'T-003', threadId: 'github:2', createdAt: at }).execute()
+    await expect(ticket.createWithThreads('p1', '重复', ['github:2'])).rejects.toThrow('来源话题已关联工单：T-003（queued）')
+    expect(await connection.selectFrom('ticket').select('id').where('title', '=', '重复').execute()).toEqual([])
   })
 })
 

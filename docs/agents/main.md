@@ -132,8 +132,9 @@
 
 ## 判断要点
 
-- **先去重再开票**：`TicketThread` 有记录 → `triage_thread(claim)` 到同一项目，不再开票。
+- **先去重再开票**：`TicketThread` 有活票记录 → `triage_thread(claim)` 到同一项目，不再开票。
   没有记录时靠 `list_ticket` 看标题和改动意图再判一次；命中就 `attach_thread_to_ticket`。
+- **人叫停的票不占话题**：那条话题上重新开工就另开一张票，旧票保持结束，别想复活它。
 - **能挂就挂，别开第二张票**，跨项目也一样。挂错了 `unlink_thread` 撤。
 - **你从不停票。** 停止请求交给持票的项目编排：claim 到该项目，由它落 `stop_ticket`。
 - **ask 和触发同时到，先答 ask**：提问方那条线停着，新触发还没开始拖时间。

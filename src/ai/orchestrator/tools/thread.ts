@@ -4,7 +4,7 @@ import { session } from '@/service/session'
 
 export const triage_thread = defineTool({
   name: 'triage_thread',
-  description: '给一条还没票跟着的话题定归属。判一次就固定，之后不再打扰主编排。',
+  description: '给一条还没活票跟着的话题定归属。判一次就固定，之后不再打扰主编排；人叫停的票不占话题，可以重新判。',
   parameters: {
     threadId: {
       type: 'string',
@@ -35,9 +35,12 @@ export const triage_thread = defineTool({
     const thread = await db.thread.findById(args.threadId)
     if (!thread)
       throw new Error('话题不存在')
-    if ((await db.ticketThread.listByThread(thread.id)).length)
-      throw new Error('已有工单订阅的话题不能分诊')
-    if (thread.triage !== 'pending')
+    const followers = await db.ticketThread.listFollowers(thread.id)
+    const live = followers.filter(row => row.status !== 'cancelled')
+    if (live.length)
+      throw new Error(`已有工单订阅的话题不能分诊：${live.map(row => `${row.ticketId}（${row.status}）`).join('、')} 还跟着它。`)
+    // 只剩人叫停的票时，话题等于没有票跟着：人叫停的是那张票，不是这条话题，新活可以重新接受。
+    if (!followers.length && thread.triage !== 'pending')
       throw new Error('话题已分诊')
     if (args.action === 'claim') {
       if (!args.projectId || !(await db.project.findById(args.projectId)))
@@ -133,7 +136,7 @@ export const unlink_thread = defineTool({
       throw new Error('工单不存在')
     const links = await db.ticketThread.listByTicket(args.ticketId)
     if (links[0]?.threadId === args.threadId)
-      throw new Error('不能摘掉触发来源话题')
+      throw new Error('不能摘掉触发来源话题：那是这张票从哪来的唯一记录。要在同一话题上重新开工，另开一张票即可。')
     if (!links.some(row => row.threadId === args.threadId))
       throw new Error('订阅不存在')
     await db.ticketThread.unlink(args.ticketId, args.threadId)

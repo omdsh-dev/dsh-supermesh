@@ -188,15 +188,17 @@ export class Ticket extends Model<DB, 'ticket'> {
         throw new Error('来源话题不存在')
       // 去重限同一项目内：同一话题在同一项目里重复建票是噪音，
       // 但跨项目共用同一话题是正常协调（flow.md：一条话题可以同时被两个项目的票跟着）。
+      // 人叫停的票不占话题：那里的新活本来就该另开一张票。
       const duplicate = await trx
         .selectFrom('ticket_thread')
         .innerJoin('ticket', 'ticket.id', 'ticket_thread.ticketId')
-        .select('ticket_thread.ticketId')
+        .select(['ticket_thread.ticketId', 'ticket.status'])
         .where('ticket_thread.threadId', 'in', ids)
         .where('ticket.projectId', '=', projectId)
+        .where('ticket.status', '!=', 'cancelled')
         .executeTakeFirst()
       if (duplicate)
-        throw new Error(`来源话题已关联工单：${duplicate.ticketId}`)
+        throw new Error(`来源话题已关联工单：${duplicate.ticketId}（${duplicate.status}）`)
       const now = new Date().toISOString()
       const previous = await trx.selectFrom('ticket').select('id').execute()
       const highest = previous.reduce((max, row) => {

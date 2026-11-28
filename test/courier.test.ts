@@ -1,4 +1,4 @@
-import type { ThreadRow } from '@/service/courier.types'
+import type { ThreadRow, TicketRow } from '@/service/courier.types'
 import { describe, expect, it } from 'vitest'
 import { ChannelError } from '@/channel/_shared/error'
 import { courier } from '@/service/courier'
@@ -7,6 +7,10 @@ const at = '2026-01-01T00:00:00.000Z'
 
 function thread(projectId: string | null, triage: 'pending' | 'claimed' | 'ignored'): ThreadRow {
   return { id: 'github:owner/repo:1', channelId: 'github', projectId, refId: 'owner/repo:1', kind: 'issue', title: 'Issue', url: 'https://github.com/owner/repo/issues/1', createdAt: at, updatedAt: at, triage, triagedAt: null }
+}
+
+function ticket(id: string, projectId: string, status: TicketRow['status']): TicketRow {
+  return { id, projectId, channelId: 'github', title: id, description: null, status, createdAt: at, updatedAt: at, startedAt: null, endedAt: null, prUrl: null, prState: null, ciState: null, paused: 0, prepareError: null }
 }
 
 describe('渠道分页切片', () => {
@@ -34,6 +38,55 @@ describe('触发邮件的收件人', () => {
   })
   it('有票跟随时投给票所在项目', () => {
     expect(courier.route(thread('p1', 'pending'), { id: 'T-1', projectId: 'p2' })).toEqual({ key: 'p2', type: 'project', projectId: 'p2', ticketId: 'T-1' })
+  })
+})
+
+describe('订阅里谁收到触发', () => {
+  it('活票跟着时投给它所在项目', () => {
+    const plan = courier.recipients({ thread: thread('p1', 'claimed'), tickets: [ticket('T-1', 'p2', 'running')], human: true, mentioned: false, fresh: true })
+    expect(plan.follow.map(item => item.target)).toEqual([{ key: 'p2', type: 'project', projectId: 'p2', ticketId: 'T-1' }])
+    expect(plan.revive).toEqual([])
+    expect(plan.fallback).toBeNull()
+  })
+  it('人叫停的票收不到东西，也不占话题：人的话回主编排重新分诊', () => {
+    const plan = courier.recipients({ thread: thread('p1', 'claimed'), tickets: [ticket('T-1', 'p1', 'cancelled')], human: true, mentioned: false, fresh: true })
+    expect(plan.follow).toEqual([])
+    expect(plan.revive).toEqual([])
+    expect(plan.fallback).toEqual({ key: 'main', type: 'main', projectId: 'p1', ticketId: null })
+  })
+  it('只剩已取消的票时机器人不叫醒任何人', () => {
+    const plan = courier.recipients({ thread: thread('p1', 'claimed'), tickets: [ticket('T-1', 'p1', 'cancelled')], human: false, mentioned: true, fresh: true })
+    expect(plan.follow).toEqual([])
+    expect(plan.revive).toEqual([])
+    expect(plan.fallback).toBeNull()
+  })
+  it('重读的同一条消息不再叫醒主编排', () => {
+    const plan = courier.recipients({ thread: thread('p1', 'claimed'), tickets: [ticket('T-1', 'p1', 'cancelled')], human: true, mentioned: false, fresh: false })
+    expect(plan.fallback).toBeNull()
+  })
+  it('做完的票要人 @ 才唤醒，取消的票不挡它', () => {
+    const plan = courier.recipients({ thread: thread('p1', 'claimed'), tickets: [ticket('T-1', 'p1', 'done'), ticket('T-2', 'p1', 'cancelled')], human: true, mentioned: true, fresh: true })
+    expect(plan.revive.map(item => item.ticket.id)).toEqual(['T-1'])
+    expect(plan.follow).toEqual([])
+    expect(plan.fallback).toBeNull()
+  })
+  it('重读的旧 @ 不再唤醒做完的票', () => {
+    const plan = courier.recipients({ thread: thread('p1', 'claimed'), tickets: [ticket('T-1', 'p1', 'done')], human: true, mentioned: true, fresh: false })
+    expect(plan.revive).toEqual([])
+    expect(plan.fallback).toBeNull()
+  })
+  it('判过 ignore 的话题不再打扰主编排，除非有人又 @ 了我们', () => {
+    const tickets = [ticket('T-1', 'p1', 'cancelled')]
+    const ignored = courier.recipients({ thread: thread('p1', 'ignored'), tickets, human: true, mentioned: false, fresh: true })
+    expect(ignored.fallback).toBeNull()
+    const mentioned = courier.recipients({ thread: thread('p1', 'ignored'), tickets, human: true, mentioned: true, fresh: true })
+    expect(mentioned.fallback).toEqual({ key: 'main', type: 'main', projectId: 'p1', ticketId: null })
+  })
+  it('做完的票没被点名时保持结束，也不改投主编排', () => {
+    const plan = courier.recipients({ thread: thread('p1', 'claimed'), tickets: [ticket('T-1', 'p1', 'done')], human: true, mentioned: false, fresh: true })
+    expect(plan.revive).toEqual([])
+    expect(plan.follow).toEqual([])
+    expect(plan.fallback).toBeNull()
   })
 })
 

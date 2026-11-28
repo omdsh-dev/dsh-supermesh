@@ -1155,6 +1155,80 @@ const cases = {
     await courier.ingest(binding.of(github).ingestor, thread, { ...issue(1), id: 9201, body: '票建好之后再评论' }, 'comment', baseline, 'comment')
     assert.equal(await db.inbox.findById(`${thread.id}:comment:9201:inbox:main`), undefined, 'an already subscribed thread must not let a self comment through')
   },
+  async cancelledThread() {
+    const { setting } = await import('@/service/setting.ts')
+    const { courier } = await import('@/service/courier.ts')
+    const { github } = await import('@/channel/github/channel.ts')
+    const { binding } = await import('@/channel/github/service/binding.ts')
+    const { recordThread } = await import('@/channel/_shared/thread.ts')
+    await setting.save({ administrators: ['hairyf'] })
+    await db.channel.saveConfiguration('github', 'GitHub', 'https://github.com', false, { commitName: 'Supermesh bot', commitEmail: 'bot@example.invalid' }, { name: 'hairyfbot', avatar: null })
+    const p = await project('cancelled-thread-project')
+    await db.project.setRemoteUrl(p.id, 'https://github.com/example/cancelled-thread', now)
+    const baseline = '1970-01-01T00:00:00.000Z'
+    const thread = await recordThread({ channel: 'github', refId: 'example/cancelled-thread:1', kind: 'issue', title: 'Cancelled thread', url: 'https://github.com/example/cancelled-thread/issues/1', createdAt: now, updatedAt: now, projectId: p.id })
+    await db.thread.claim(thread.id, p.id, now)
+    const cancelledId = 'cancelled-thread-ticket'
+    await db.ticket.create({ id: cancelledId, projectId: p.id, channelId: 'github', title: '被人叫停的活', description: null, status: 'cancelled', createdAt: now, updatedAt: now, startedAt: now, endedAt: now, prUrl: null, prState: null, ciState: null, paused: 0, prepareError: null })
+    await db.ticketThread.link(cancelledId, thread.id, now)
+    const comment = (id, login, body, type = 'User') => ({ id, body, html_url: `${thread.url}#issuecomment-${id}`, user: { login, type }, created_at: now, updated_at: now })
+    const ingestor = binding.of(github).ingestor
+    // 人叫停的票保留订阅，但那条线已经停了：票收不到东西，人的话要回到主编排重新分诊。
+    await courier.ingest(ingestor, thread, comment(7001, 'hairyf', '这个再开一下'), 'comment', baseline, 'comment')
+    const humanTrigger = `${thread.id}:comment:7001`
+    assert.notEqual(await db.inbox.findById(`${humanTrigger}:inbox:main`), undefined, 'a human comment on a cancelled thread must reach main for triage')
+    assert.equal(await db.inbox.findById(`${humanTrigger}:inbox:${p.id}`), undefined, 'a cancelled ticket must not receive the trigger')
+    assert.deepEqual(await db.inbox.listByTicket(cancelledId), [], 'a cancelled ticket must stay silent')
+    assert.equal((await db.ticketThread.listFollowers(thread.id)).some(row => row.ticketId === cancelledId), true, 'a cancelled ticket keeps its subscription')
+    // 机器人说话只作上下文：已取消的票收不到，也不叫醒主编排。
+    await courier.ingest(ingestor, thread, comment(7002, 'ci-bot', '构建完成', 'Bot'), 'comment', baseline, 'comment')
+    assert.equal(await db.inbox.findById(`${thread.id}:comment:7002:inbox:main`), undefined, 'a bot comment must not wake main')
+    assert.equal(await db.inbox.findById(`${thread.id}:comment:7002:inbox:${p.id}`), undefined)
+    // 主编排重新接受这条话题：分诊和建票都不再被已取消的票挡住。
+    const main = await session.activate(await session.create('main', {}))
+    const triage = await runtime.ctx.tools.execute({
+      calls: [{ type: 'tool-call', id: 'call-cancelled-triage', name: 'triage_thread', arguments: JSON.stringify({ threadId: thread.id, action: 'claim', projectId: p.id }) }],
+      signal: AbortSignal.timeout(15000),
+      agent: main,
+    })
+    assert.equal(triage.results[0].result.isError, false, `triage_thread must accept a thread whose only ticket was cancelled: ${JSON.stringify(triage.results[0].result)}`)
+    // 触发来源那条仍然摘不掉，但要说清原因和出路，而不是一个互不相干的错。
+    const unlink = await runtime.ctx.tools.execute({
+      calls: [{ type: 'tool-call', id: 'call-cancelled-unlink', name: 'unlink_thread', arguments: JSON.stringify({ ticketId: cancelledId, threadId: thread.id, reason: '想挂到新票上' }) }],
+      signal: AbortSignal.timeout(15000),
+      agent: main,
+    })
+    assert.equal(unlink.results[0].result.isError, true, 'the trigger source stays attached to the ticket it came from')
+    assert.match(JSON.stringify(unlink.results[0].result), /另开一张票/)
+    const created = await runtime.ctx.tools.execute({
+      calls: [{ type: 'tool-call', id: 'call-cancelled-ticket', name: 'create_ticket', arguments: JSON.stringify({ title: '重新开工', projectId: p.id, threadIds: [thread.id] }) }],
+      signal: AbortSignal.timeout(15000),
+      agent: main,
+    })
+    assert.equal(created.results[0].result.isError, false, `create_ticket must accept a thread whose only ticket was cancelled: ${JSON.stringify(created.results[0].result)}`)
+    const reopened = (await db.ticketThread.listFollowers(thread.id)).filter(row => row.status !== 'cancelled')
+    assert.equal(reopened.length, 1, 'the new ticket must be the only live subscription')
+    const reopenedId = reopened[0].ticketId
+    assert.notEqual(reopenedId, cancelledId)
+    // 新票跟着之后，同一条话题上的话回到项目编排；重复建票和重新分诊都被这张活票挡住。
+    await courier.ingest(ingestor, thread, comment(7003, 'hairyf', '按刚才说的改'), 'comment', baseline, 'comment')
+    const followMail = await db.inbox.findById(`${thread.id}:comment:7003:inbox:${p.id}`)
+    assert.equal(followMail?.ticketId, reopenedId, 'a live ticket must take the thread back')
+    const duplicate = await runtime.ctx.tools.execute({
+      calls: [{ type: 'tool-call', id: 'call-cancelled-duplicate', name: 'create_ticket', arguments: JSON.stringify({ title: '再来一张', projectId: p.id, threadIds: [thread.id] }) }],
+      signal: AbortSignal.timeout(15000),
+      agent: main,
+    })
+    assert.equal(duplicate.results[0].result.isError, true, 'a live ticket must still block a duplicate ticket')
+    assert.match(JSON.stringify(duplicate.results[0].result), new RegExp(reopenedId))
+    const retriage = await runtime.ctx.tools.execute({
+      calls: [{ type: 'tool-call', id: 'call-cancelled-retriage', name: 'triage_thread', arguments: JSON.stringify({ threadId: thread.id, action: 'claim', projectId: p.id }) }],
+      signal: AbortSignal.timeout(15000),
+      agent: main,
+    })
+    assert.equal(retriage.results[0].result.isError, true, 'a live ticket must still block re-triage')
+    assert.match(JSON.stringify(retriage.results[0].result), new RegExp(reopenedId))
+  },
   async supervisorOpen() {
     const p = await project('supervisor-open-project')
     await db.insertInto('channel').values({ id: 'github', name: 'GitHub', enabled: 0, host: null, createdAt: now }).onConflict(oc => oc.column('id').doNothing()).execute()

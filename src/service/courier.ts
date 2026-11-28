@@ -96,6 +96,36 @@ export const courier = defineService({
     const claimed = thread.triage === 'claimed' ? thread.projectId : null
     return { key: claimed ?? 'main', type: claimed ? 'project' : 'main', projectId: thread.projectId, ticketId: null }
   },
+  /**
+   * 一条触发在订阅里该投给谁。
+   *
+   * 人叫停的票保留订阅，但那条线已经停了：既不投递，也不借订阅把票拉回来。
+   * 所以只剩已取消的票跟着时，人的话回主编排重新分诊 —— 那里的新活要重新接受；
+   * 机器人和 CI 在同样的情况下只是上下文，不叫醒任何人。
+   */
+  recipients(input: { thread: ThreadRow, tickets: TicketRow[], human: boolean, mentioned: boolean, fresh: boolean }): { revive: { ticket: TicketRow, target: TriggerTarget }[], follow: { ticket: TicketRow, target: TriggerTarget }[], fallback: TriggerTarget | null } {
+    const revive: { ticket: TicketRow, target: TriggerTarget }[] = []
+    const follow: { ticket: TicketRow, target: TriggerTarget }[] = []
+    let following = false
+    for (const ticket of input.tickets) {
+      if (ticket.status === 'cancelled')
+        continue
+      following = true
+      const target = courier.route(input.thread, ticket)
+      if (ticket.status === 'done' || ticket.status === 'completed') {
+        // 重读同一条旧 @ 不算新事实：只有第一次读到、或编辑后补上 @ 才唤醒。
+        if (input.fresh && input.mentioned)
+          revive.push({ ticket, target })
+        continue
+      }
+      follow.push({ ticket, target })
+    }
+    if (following)
+      return { revive, follow, fallback: null }
+    // 判过 ignore 的话题不再打扰主编排，除非有人又 @ 了我们 —— 与未订阅话题的准入规则一致。
+    const ignored = input.thread.triage === 'ignored' && !input.mentioned
+    return { revive, follow, fallback: input.fresh && input.human && !ignored ? { key: 'main', type: 'main', projectId: input.thread.projectId, ticketId: null } : null }
+  },
   async ingest(port: IngestPort, thread: ThreadRow, row: ChannelRow, kind: 'open' | 'comment' | 'close', baseline: string, sourceKind: string): Promise<void> {
     const bots = await port.bots()
     const actorName = port.actor(row)
@@ -128,27 +158,28 @@ export const courier = defineService({
       return
     }
     const targets = new Map<string, TriggerTarget>()
-    for (const ticketId of subscriptions) {
-      const ticket = await db.ticket.findById(ticketId)
-      if (!ticket)
-        continue
-      // 只有做完的票会被人新的 @ 唤醒（含编辑补上的 @）；人叫停的票保持结束，那里的新活要重新分诊。
-      if (['done', 'completed', 'cancelled'].includes(ticket.status)) {
-        if (!fresh || !mentioned || !(await db.ticket.revive(ticketId, at)))
+    if (subscriptions.length) {
+      const tickets = (await Promise.all(subscriptions.map(ticketId => db.ticket.findById(ticketId))))
+        .filter((ticket): ticket is TicketRow => ticket !== undefined)
+      const plan = courier.recipients({ thread, tickets, human, mentioned, fresh })
+      for (const { ticket, target } of plan.revive) {
+        // 只有做完的票会被人新的 @ 唤醒（含编辑补上的 @）；人叫停的票保持结束，那里的新活要重新分诊。
+        if (!(await db.ticket.revive(ticket.id, at)))
           continue
-        await db.worker.queue(ticketId, ticket.projectId)
-        const target = courier.route(thread, ticket)
+        await db.worker.queue(ticket.id, ticket.projectId)
         targets.set(target.key, target)
-        continue
       }
-      // 机器人消息只作上下文：重新开工必须是人说的，不能让 bot / CI 借订阅把票从 review 拉回队列。
-      // 重读同一条消息同样不算新意见：只有第一次读到、或编辑后补上 @ 的评论才重新派工。
-      if (fresh && human && kind === 'comment')
-        await port.onSubscribedTicket?.(ticket)
-      const target = courier.route(thread, ticket)
-      targets.set(target.key, target)
+      for (const { ticket, target } of plan.follow) {
+        // 机器人消息只作上下文：重新开工必须是人说的，不能让 bot / CI 借订阅把票从 review 拉回队列。
+        // 重读同一条消息同样不算新意见：只有第一次读到、或编辑后补上 @ 的评论才重新派工。
+        if (fresh && human && kind === 'comment')
+          await port.onSubscribedTicket?.(ticket)
+        targets.set(target.key, target)
+      }
+      if (plan.fallback)
+        targets.set(plan.fallback.key, plan.fallback)
     }
-    if (!subscriptions.length) {
+    else {
       // self 是主编排自己开的活，收件人只能是主编排：话题已被采集侧写上 projectId 也不改投项目。
       const target: TriggerTarget = strength === 'self'
         ? { key: 'main', type: 'main', projectId: thread.projectId, ticketId: null }

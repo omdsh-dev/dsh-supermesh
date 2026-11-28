@@ -87,6 +87,7 @@ describe('supermesh services composed with the installed official runtime', () =
     ['channelNotice', 'a channel trigger wakes the project orchestrator with the same compact notice and keeps its body in the mailbox'],
     ['triggerAttribution', 'a channel trigger carries the project matched by its repository and the mailbox exposes that as a server fact'],
     ['selfTrigger', 'a self opened issue wakes main and passes the ticket gate while a bot comment is dropped'],
+    ['cancelledThread', 'a cancelled ticket keeps its subscription but never receives or holds the thread, so main can re-triage and open a new one'],
     ['supervisorOpen', 'creating a supervisor puts its opening context in the mailbox instead of the conversation'],
     ['ticketArchive', 'a ticket that reached a terminal state archives its ended worker sessions and skips them when archiving is off'],
     ['workerRedispatch', 'a requeued worker receives the dispatch prompt again instead of being deduplicated by request id'],

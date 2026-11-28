@@ -57,7 +57,7 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    T["新 Trigger"] --> S{"TicketThread 有记录?"}
+    T["新 Trigger"] --> S{"TicketThread 有活票?"}
 
     S -->|有| K["投给这些票所在的项目编排"]
     S -->|没有| Q{"Thread.triage"}
@@ -65,6 +65,7 @@ flowchart TD
     Q -->|pending| M["投给主编排"]
     Q -->|claimed| P["投给该项目编排"]
     Q -->|ignored| I{"mentioned?"}
+    S -->|"只剩已取消的票"| M
 
     I -->|否| DROP["丢弃"]
     I -->|是| M
@@ -77,6 +78,10 @@ flowchart TD
     M -->|"已有票在跟"| A["attach_thread_to_ticket"]
     A -.->|"只写 TicketThread"| K
 ```
+
+**人叫停的票不占话题。** 订阅行保留，但那条线已经停了：既不投递，也不借订阅唤醒。
+只剩已取消的票跟着时，人的消息回主编排重新分诊 —— `triage_thread` 和 `create_ticket` 都不再被它挡住；
+机器人和 CI 在那里只是上下文，不叫醒任何人。
 
 **所有没票跟着的新话题都先进主编排**（分支 CI 除外，见 8.5）。它是唯一做归属判断的地方。
 
@@ -533,8 +538,8 @@ sequenceDiagram
     CH->>M: Inbox kind=notice
 ```
 
-**同话题追加消息不经过主编排**：`TicketThread` 已有票跟着，直接投给该项目编排 ——
-分诊已完成，不该被同一件事反复叫醒。
+**同话题追加消息不经过主编排**：`TicketThread` 已有活票跟着，直接投给该项目编排 ——
+分诊已完成，不该被同一件事反复叫醒。人叫停的票不算：那条线已经停了，那里的新活要重新分诊。
 
 ---
 
