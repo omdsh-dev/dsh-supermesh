@@ -1,13 +1,14 @@
-import { a as project, c as shell, d as singlet, f as setting, g as db, h as channelProxyEnvironment, i as archive, l as inbox, m as DSH_PLUGIN_HOME, n as server, o as worktree, p as defineService, r as worker$1, s as devops, t as channel, u as session } from "./channel-ChqKKcYq.js";
+import { _ as channelTriggerRejection, a as worktree, b as db, c as channel, d as session, f as latestTriggerStrength, g as addressedToBot, h as singlet, i as project, l as channelProxyEnvironment, m as defineService, n as archive, o as devops, p as setting, r as server, s as shell, t as worker$1, u as inbox, v as channelTriggerStrength, x as DSH_PLUGIN_HOME, y as ticketAllowed } from "./worker-Boli6UWL.js";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import process from "node:process";
 import { defineTool } from "@deepseek-ai/dsh-tools";
 import { createHash, randomUUID } from "node:crypto";
+import { getServerContext } from "dsh-h3/utils";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { createRouteDispatcher } from "@deepseek-ai/dsh-http-proxy";
-import { mkdir, readFile, rename as rename$1, writeFile } from "node:fs/promises";
 import { fetch } from "undici";
 import { Cron } from "croner";
 // src/ai/_shared/prompt-file.ts
@@ -217,9 +218,9 @@ const toolWeb = {
 		searchTimeoutMs: 6e4
 	}
 };
-const toolExecutorPtc = {
-	id: "tool-executor-ptc",
-	name: "@deepseek-ai/dsh-tool-executor-ptc"
+const toolRegistryPtc = {
+	id: "tool-registry-ptc",
+	name: "@deepseek-ai/dsh-tool-registry-ptc"
 };
 const toolPresent = {
 	id: "present",
@@ -267,26 +268,19 @@ async function latestVersion(threadId) {
 async function markThread(exec, threadId) {
 	observe(exec, threadId, await latestVersion(threadId));
 }
-// src/channel/_shared/admission.ts
-function acceptsChannelTrigger(input) {
-	if (!input.human || input.historical && !input.subscribed) return false;
-	return input.subscribed || input.admin && (input.kind === "open" || input.mentioned) && (!input.ignored || input.mentioned);
-}
-/**
-* 进流程不等于被点名。没 @ bot 的消息只是时间线记录：可以分诊，但不建票、不派工、也不在渠道上发言。
-* 只有明确 @、或者这条话题已经被票订阅（人在跟进已有任务）才算在跟 bot 说话。
-*/
-function addressedToBot(input) {
-	return input.mentioned || input.subscribed;
-}
 // src/channel/_shared/error.ts
 var ChannelError = class extends Error {
 	code;
 	retryAfterSeconds;
-	constructor(code, retryAfterSeconds) {
+	hint;
+	location;
+	/** hint 是给人看的补充说明，不参与失败分类，只随原因码一起显示。 */
+	constructor(code, retryAfterSeconds, location, hint) {
 		super(code);
 		this.code = code;
 		this.retryAfterSeconds = retryAfterSeconds;
+		this.hint = hint;
+		this.location = location;
 	}
 };
 // src/channel/_shared/primitives.ts
@@ -330,9 +324,13 @@ function cursorAt(started) {
 	return (/* @__PURE__ */ new Date(Date.parse(started) - 5e3)).toISOString();
 }
 // src/channel/_shared/thread.ts
+/**
+* 记录话题。采集侧已经知道仓库属于哪个项目时一并写入归属，触发邮件就不必让主编排拿仓库名去猜；
+* 分诊结论仍然是 pending，投递路由不变。
+*/
 async function recordThread(input) {
 	const existing = await db.thread.findByRef(input.channel, input.refId);
-	return db.thread.record({
+	const row = await db.thread.record({
 		id: existing?.id ?? `${input.channel}:${input.refId}`,
 		channelId: input.channel,
 		refId: input.refId,
@@ -341,14 +339,25 @@ async function recordThread(input) {
 		url: input.url,
 		createdAt: input.createdAt,
 		updatedAt: input.updatedAt,
-		projectId: null,
+		projectId: input.projectId ?? null,
 		triage: "pending",
 		triagedAt: null
 	});
+	if (row.projectId || !input.projectId) return row;
+	await db.thread.bindProject(row.id, input.projectId);
+	return await db.thread.findById(row.id);
+}
+/** 同一仓库下已经记录、但还没有归属的话题补上项目；只写 projectId，不动分诊结论。 */
+async function bindThreads(input) {
+	for (const thread of await db.thread.listUnbound(input.channel)) {
+		if (!thread.refId.startsWith(input.refPrefix)) continue;
+		await db.thread.bindProject(thread.id, input.projectId);
+	}
 }
 /** 结单话题；合并时顺带关闭同一项目下已结单票关联的 issue。 */
 async function closeThread(input) {
-	const ended = await db.ticket.closeThread(input.thread.id, input.outcome, input.at, input.branch);
+	const ended = await db.ticket.closeThread(input.thread.id, input.outcome, input.at);
+	for (const ticketId of ended) await worker$1.archiveSessions(ticketId);
 	if (input.outcome !== "merged" || !ended.length) return;
 	for (const source of await db.thread.listByChannel(input.channel)) {
 		if (source.kind !== "issue" || source.projectId !== input.projectId || !source.url) continue;
@@ -383,6 +392,7 @@ var ExecFileGhRunner = class {
 		];
 		for (const [key, value] of Object.entries(request.headers ?? {})) args.push("-H", `${key}: ${value}`);
 		if (request.body) args.push("--input", "-");
+		const location = `${request.method} ${request.path.split("?")[0]}`;
 		return new Promise((resolve, reject) => {
 			const child = execFile("gh", args, {
 				signal: request.signal,
@@ -399,7 +409,7 @@ var ExecFileGhRunner = class {
 				}
 				if (error) {
 					const code = error.code;
-					reject(new GhError(code === "ENOENT" ? "gh_missing" : status === 401 || /gh auth login|not logged/i.test(stderr) ? "not_logged_in" : status === 429 || /rate limit/i.test(stderr) ? "rate_limited" : status === 403 ? "forbidden" : status === 404 ? "not_found" : status >= 400 && status < 500 ? "remote_rejected" : code === "ABORT_ERR" ? "interrupted" : "transport_unknown", retryAfter ? Number(retryAfter) : void 0));
+					reject(new GhError(code === "ENOENT" ? "gh_missing" : status === 401 || /gh auth login|not logged/i.test(stderr) ? "not_logged_in" : status === 429 || /rate limit/i.test(stderr) ? "rate_limited" : status === 403 ? "forbidden" : status === 404 ? "not_found" : status >= 400 && status < 500 ? "remote_rejected" : code === "ABORT_ERR" ? "interrupted" : "transport_unknown", retryAfter ? Number(retryAfter) : void 0, location));
 					return;
 				}
 				try {
@@ -408,7 +418,7 @@ var ExecFileGhRunner = class {
 					const body = response.slice(separator + 2).trim();
 					resolve(body ? JSON.parse(body) : null);
 				} catch {
-					reject(new GhError("invalid_response"));
+					reject(new GhError("invalid_response", void 0, location));
 				}
 			});
 			if (request.body) child.stdin.end(JSON.stringify(request.body));
@@ -427,6 +437,75 @@ function* answerLines(body) {
 		if (fenced) continue;
 		yield line;
 	}
+}
+// src/channel/_shared/mention.ts
+const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})/;
+const QUOTE_LINE = /^ {0,3}>/;
+/**
+* 平台不会把围栏代码块、行内代码和引用块里的 @ 解析成 mention，
+* 判定点名之前先剥掉这些区域，避免「引用 bot 名字」被当成点名。
+*/
+function stripCodeAndQuotes(body) {
+	const visible = [];
+	let close = null;
+	for (const line of body.split("\n")) {
+		if (close) {
+			if (close.test(line)) close = null;
+			continue;
+		}
+		const open = FENCE_OPEN.exec(line);
+		if (open) {
+			const marker = open[1];
+			close = new RegExp(`^ {0,3}${marker[0]}{${marker.length},}\\s*$`);
+			continue;
+		}
+		if (QUOTE_LINE.test(line)) continue;
+		visible.push(line);
+	}
+	return stripInlineCode(visible.join("\n"));
+}
+function stripInlineCode(text) {
+	let visible = "";
+	let index = 0;
+	while (index < text.length) {
+		if (text[index] !== "`") {
+			visible += text[index];
+			index += 1;
+			continue;
+		}
+		let size = 1;
+		while (text[index + size] === "`") size += 1;
+		const marker = "`".repeat(size);
+		let cursor = index + size;
+		let end = -1;
+		while (cursor < text.length) {
+			const found = text.indexOf(marker, cursor);
+			if (found < 0) break;
+			cursor = found + size;
+			if (text[found - 1] !== "`" && text[cursor] !== "`") {
+				end = cursor;
+				break;
+			}
+		}
+		if (end < 0) {
+			visible += marker;
+			index += size;
+			continue;
+		}
+		visible += " ";
+		index = end;
+	}
+	return visible;
+}
+/** GitHub 的 @ 只要求后面不是用户名字符。 */
+function githubMentioned(body, bots) {
+	const visible = stripCodeAndQuotes(body);
+	return bots.some((bot) => new RegExp(`@${escapeRegex(bot.name)}(?![a-z0-9-])`, "i").test(visible));
+}
+/** GitLab 的 @ 还要求前面不是用户名字符，避免把邮箱当成点名。 */
+function gitlabMentioned(body, bots) {
+	const visible = stripCodeAndQuotes(body);
+	return bots.some((bot) => new RegExp(`(?:^|[^a-z0-9_@])@${escapeRegex(bot.name)}(?![a-z0-9_.-])`, "i").test(visible));
 }
 // src/channel/_shared/ci.ts
 /** 分支 CI 变更落成 ciWatch、ci 话题与触发；只有订阅了这条话题的票才收到通知。 */
@@ -471,7 +550,11 @@ async function notifyBranchCi(input) {
 	});
 	for (const ticketId of await db.ticketThread.listTicketIds(threadId)) {
 		const ticket = await db.ticket.findById(ticketId);
-		if (!ticket || ["done", "cancelled"].includes(ticket.status)) continue;
+		if (!ticket || [
+			"done",
+			"completed",
+			"cancelled"
+		].includes(ticket.status)) continue;
 		await db.inbox.enqueue({
 			id: `${triggerId}:ticket:${ticketId}`,
 			type: "project",
@@ -614,14 +697,36 @@ const courier = defineService({
 		if (value.etag !== void 0) next.etag = value.etag;
 		await courier.record(input.channel, input.scope, `cursor:${input.name}`, next);
 	},
+	/**
+	* 触发邮件的收件人：有票跟着就投给票所在项目；没有票时按话题分诊结论投给主编排或项目。
+	* 无论投给谁，都把话题已匹配的项目一起带上 —— 主编排据此知道该翻哪个项目的上下文，不必拿仓库名猜。
+	*/
+	route(thread, ticket) {
+		if (ticket) return {
+			key: ticket.projectId,
+			type: "project",
+			projectId: ticket.projectId,
+			ticketId: ticket.id
+		};
+		const claimed = thread.triage === "claimed" ? thread.projectId : null;
+		return {
+			key: claimed ?? "main",
+			type: claimed ? "project" : "main",
+			projectId: thread.projectId,
+			ticketId: null
+		};
+	},
 	async ingest(port, thread, row, kind, baseline, sourceKind) {
 		const bots = await port.bots();
 		const actorName = port.actor(row);
+		const self = actorName !== "" && bots.some((bot) => bot.name.toLowerCase() === actorName.toLowerCase());
 		const human = port.human(row, bots);
 		const body = port.body(row);
 		const mentioned = port.mentioned(body, bots);
-		const at = port.at(row);
+		const at = port.at(row, kind);
 		const id = `${thread.id}:${sourceKind}:${identity(row.id)}`;
+		const previous = await db.trigger.findById(id);
+		const fresh = !previous || previous.mentioned === 0 && mentioned;
 		await db.trigger.ingest({
 			id,
 			channelId: port.channel,
@@ -637,44 +742,64 @@ const courier = defineService({
 		});
 		const subscriptions = await db.ticketThread.listTicketIds(thread.id);
 		const historical = port.createdAt(row) < baseline;
-		const admin = (await setting.load()).administrators.some((name) => name.toLowerCase() === actorName.toLowerCase());
-		if (!acceptsChannelTrigger({
+		const { administrators, inferred } = await setting.load();
+		const admin = administrators.some((name) => name.toLowerCase() === actorName.toLowerCase());
+		const admission = {
+			self,
 			human,
 			historical,
 			subscribed: subscriptions.length > 0,
 			admin,
 			mentioned,
 			kind,
-			ignored: thread.triage === "ignored"
-		})) return;
+			issue: thread.kind === "issue",
+			ignored: thread.triage === "ignored",
+			inferred
+		};
+		const strength = channelTriggerStrength(admission);
+		if (!strength) {
+			if (mentioned && channelTriggerRejection(admission) === "not_administrator") {
+				await courier.record(port.channel, "admission", "last_drop", {
+					reason: "not_administrator",
+					actor: actorName,
+					threadId: thread.id,
+					at: now()
+				});
+				console.warn(`[${port.channel}:ingest] ${thread.url ?? thread.id} ${actorName} -> not_administrator`);
+			}
+			return;
+		}
 		const targets = /* @__PURE__ */ new Map();
 		for (const ticketId of subscriptions) {
 			const ticket = await db.ticket.findById(ticketId);
 			if (!ticket) continue;
-			if (["done", "cancelled"].includes(ticket.status)) {
-				if (!mentioned) continue;
-				if (await db.ticket.reopen(ticketId, at)) {
-					await db.worker.queue(ticketId, ticket.projectId);
-					targets.set(ticket.projectId, {
-						projectId: ticket.projectId,
-						ticketId
-					});
-				}
+			if ([
+				"done",
+				"completed",
+				"cancelled"
+			].includes(ticket.status)) {
+				if (!fresh || !mentioned || !await db.ticket.revive(ticketId, at)) continue;
+				await db.worker.queue(ticketId, ticket.projectId);
+				const target = courier.route(thread, ticket);
+				targets.set(target.key, target);
 				continue;
 			}
-			await port.onSubscribedTicket?.(ticket);
-			targets.set(ticket.projectId, {
-				projectId: ticket.projectId,
-				ticketId
-			});
+			if (fresh && human && kind === "comment") await port.onSubscribedTicket?.(ticket);
+			const target = courier.route(thread, ticket);
+			targets.set(target.key, target);
 		}
-		if (!subscriptions.length) targets.set(thread.projectId ?? "main", {
-			projectId: thread.triage === "claimed" ? thread.projectId : null,
-			ticketId: null
-		});
-		for (const [key, target] of targets) await db.inbox.enqueue({
-			id: `${id}:inbox:${key}`,
-			type: target.projectId ? "project" : "main",
+		if (!subscriptions.length) {
+			const target = strength === "self" ? {
+				key: "main",
+				type: "main",
+				projectId: thread.projectId,
+				ticketId: null
+			} : courier.route(thread, null);
+			targets.set(target.key, target);
+		}
+		for (const target of targets.values()) await db.inbox.enqueue({
+			id: `${id}:inbox:${target.key}`,
+			type: target.type,
 			origin: "channel",
 			kind: "trigger",
 			message: body,
@@ -699,7 +824,11 @@ const courier = defineService({
 			if (!await courier.state(port.channel, scope, `comment:${id}`)) continue;
 			if (ask.ticketId) {
 				const ticket = await db.ticket.findById(ask.ticketId);
-				if (!ticket || ["done", "cancelled"].includes(ticket.status)) continue;
+				if (!ticket || [
+					"done",
+					"completed",
+					"cancelled"
+				].includes(ticket.status)) continue;
 			}
 			await db.inbox.answerByUser(id, answer, now());
 		}
@@ -711,18 +840,22 @@ const courier = defineService({
 			const thread = trigger && await db.thread.findById(trigger.threadId);
 			if (!thread?.url || thread.channelId !== port.channel || !["issue", "pull"].includes(thread.kind) || row.threadId && row.threadId !== thread.id) throw new ChannelError("no_reply_address");
 			const target = await port.parse(thread.url);
-			const project = await port.projectFor(target);
-			if (!project) throw new ChannelError("unknown_repository");
+			const project = await projectFor(port, thread, target);
 			if (row.ticketId) {
 				const ticket = await db.ticket.findById(row.ticketId);
-				if (row.kind === "ask" && ticket && ["done", "cancelled"].includes(ticket.status)) throw new ChannelError("delivery_superseded");
+				if (row.kind === "ask" && ticket && [
+					"done",
+					"completed",
+					"cancelled"
+				].includes(ticket.status)) throw new ChannelError("delivery_superseded");
 				if (!ticket || ticket.projectId !== project.id) throw new ChannelError("scope_denied");
 				if (ticket.paused) throw new ChannelError("human_paused");
 				if (!(await db.ticketThread.listTicketIds(thread.id)).includes(ticket.id)) throw new ChannelError("unsubscribed_thread");
 			}
 			return {
 				thread,
-				target
+				target,
+				project
 			};
 		};
 		const deliver = async () => {
@@ -734,8 +867,7 @@ const courier = defineService({
 			if (row.status === "done") return { ok: true };
 			let posting = false;
 			try {
-				const { thread, target } = await destination(row);
-				const project = await port.projectFor(target);
+				const { thread, target, project } = await destination(row);
 				const environment = await port.probe(project.id, signal);
 				const scope = port.scope(target);
 				const marker = `<!-- supermesh:${row.id} -->`;
@@ -803,7 +935,7 @@ const courier = defineService({
 					"not_found",
 					"not_logged_in",
 					"remote_rejected"
-				].includes(reason)) await db.inbox.markStalled(row.id, "transport_unknown");
+				].includes(reason)) await courier.stall(row, "transport_unknown");
 				else if (![
 					"human_paused",
 					"project_disabled",
@@ -814,7 +946,7 @@ const courier = defineService({
 					row = await db.inbox.findById(row.id);
 					const settings = await setting.load();
 					const attempts = row.deliveryAttempts + (posting ? 0 : 1);
-					if (attempts >= settings.deliveryMaxAttempts) await db.inbox.markStalled(row.id, reason);
+					if (attempts >= settings.deliveryMaxAttempts) await courier.stall(row, reason);
 					else {
 						const seconds = courier.retryDelay(error, attempts, settings.deliveryRetryCeilingSeconds);
 						const nextRetryAt = new Date(Date.now() + seconds * 1e3).toISOString();
@@ -845,6 +977,29 @@ const courier = defineService({
 				if (publishing.get(key) === barrier) publishing.delete(key);
 			}
 		});
+	},
+	/**
+	* 一条对外回复彻底送不出去：标成 stalled，并告诉它的编排。
+	*
+	* 失败信号只留在行上（deliveryError / status）时，编排看不到 —— 工具早就回过 queued，
+	* 人却一直等一条永远不来的评论。改投一条邮件，让编排知道这条没送到。
+	*/
+	async stall(row, reason) {
+		await db.inbox.markStalled(row.id, reason);
+		if (row.type !== "user") return;
+		await db.inbox.enqueue({
+			id: `supermesh:reply-failed:${row.id}`,
+			type: row.projectId ? "project" : "main",
+			projectId: row.projectId,
+			supervisorId: row.supervisorId,
+			origin: "system",
+			kind: "notice",
+			ticketId: row.ticketId,
+			threadId: row.threadId,
+			triggerId: row.triggerId,
+			title: "回复没有送达",
+			message: `这条回复没能发到渠道（${reason}）：${row.message}`
+		}).catch(() => void 0);
 	},
 	async flush(port, signal) {
 		signal?.throwIfAborted();
@@ -896,19 +1051,20 @@ const courier = defineService({
 					login: "",
 					repositoryId: ""
 				},
-				attempt: async (operation) => {
+				attempt: async (step, operation) => {
 					try {
 						await operation();
 					} catch (error) {
 						if (signal?.aborted) throw error;
-						errors.push(courier.failure(error, port.detail));
+						errors.push(courier.reason(error, port.detail, step));
 					}
 				},
-				fail: (error) => {
+				fail: (error, step) => {
 					if (signal?.aborted) throw error;
-					errors.push(courier.failure(error, port.detail));
+					errors.push(courier.reason(error, port.detail, step));
 				}
 			};
+			let ready = false;
 			try {
 				project = await port.project(projectId);
 				const environment = await port.probe(projectId, signal);
@@ -920,13 +1076,18 @@ const courier = defineService({
 				context.scope = scope;
 				context.baseline = baseline;
 				context.environment = environment;
+				ready = true;
+			} catch (error) {
+				if (signal?.aborted) throw error;
+				errors.push(courier.reason(error, port.detail, "probe"));
+			}
+			if (ready) try {
 				await port.collect(context, signal);
 			} catch (error) {
 				if (signal?.aborted) throw error;
-				errors.push(courier.failure(error, port.detail));
+				errors.push(courier.reason(error, port.detail, "collect"));
 			}
-			const status = scope ?? (project ? await port.scope(project).catch(() => null) : null);
-			if (port.status && status) await courier.record(port.channel, status, "collection_status", {
+			if (port.status && project) await courier.record(port.channel, projectId, "collection_status", {
 				ok: !errors.length,
 				reasons: [...new Set(errors)],
 				collectedAt: now()
@@ -944,19 +1105,42 @@ const courier = defineService({
 	async polled(ticketIds, updatedAt, at = Date.now()) {
 		if (!ticketIds.length) return true;
 		const tickets = await Promise.all(ticketIds.map((id) => db.ticket.findById(id)));
-		if (tickets.some((ticket) => !!ticket && !["done", "cancelled"].includes(ticket.status))) return true;
+		if (tickets.some((ticket) => !!ticket && ![
+			"done",
+			"completed",
+			"cancelled"
+		].includes(ticket.status))) return true;
 		const times = [updatedAt ?? "", ...tickets.map((ticket) => ticket?.endedAt ?? "")].map((value) => Date.parse(value)).filter(Number.isFinite);
 		return times.length > 0 && at - Math.max(...times) < POLL_HORIZON_MS;
 	},
 	failure(error, detail) {
-		if (error instanceof ChannelError) return error.code;
+		if (error instanceof ChannelError) return error.hint ? `${error.code}(${error.hint})` : error.code;
 		if (error instanceof Error) return error.name === "AbortError" ? "interrupted" : detail ? `transport_unknown(${error.message.slice(0, 120)})` : "transport_unknown";
 		return "transport_unknown";
+	},
+	/** 采集失败要能定位到步骤或接口：错误自带位置优先，其次用调用方给的步骤名。 */
+	reason(error, detail, step) {
+		const code = courier.failure(error, detail);
+		const located = (error instanceof ChannelError ? error.location : void 0) ?? step;
+		return located ? `${code}:${located}` : code;
 	},
 	retryDelay(error, attempts, ceiling) {
 		return Math.max(error instanceof ChannelError ? error.retryAfterSeconds ?? 0 : 0, Math.min(ceiling, 2 ** Math.max(1, attempts)));
 	}
 });
+/** 话题仓库对不上任何项目时把两边地址写进失败原因，否则回复只会停在 unknown_repository，看不出差在哪。 */
+async function projectFor(port, thread, target) {
+	let project;
+	try {
+		project = await port.projectFor(target);
+	} catch (error) {
+		if (!(error instanceof ChannelError) || error.code !== "unknown_repository") throw error;
+	}
+	if (project) return project;
+	const bound = thread.projectId ? await db.project.findById(thread.projectId) : void 0;
+	const scope = port.scope(target);
+	throw new ChannelError("unknown_repository", void 0, void 0, bound?.remoteUrl ? `话题仓库 ${scope} 与项目远端地址 ${bound.remoteUrl} 不一致` : `话题仓库 ${scope} 未登记为项目`);
+}
 // src/channel/github/service/ci.ts
 const ci$1 = defineService({
 	async snapshot(remote, root, head, signal) {
@@ -1071,15 +1255,11 @@ const binding$1 = defineService({ of(channel) {
 			body: (row) => typeof row.body === "string" ? row.body : typeof row.state === "string" ? row.state : "",
 			url: (row) => text(row.html_url),
 			ref: (row) => row.head ? text(record(row.head).ref) : null,
-			at: (row) => timestamp(row.updated_at ?? row.submitted_at ?? row.created_at),
+			at: (row, kind) => kind === "close" ? timestamp(row.closed_at ?? row.updated_at ?? row.created_at) : timestamp(row.created_at ?? row.submitted_at),
 			createdAt: (row) => timestamp(row.created_at ?? row.submitted_at),
-			mentioned: (body, bots) => bots.some((bot) => new RegExp(`@${escapeRegex(bot.name)}(?![a-z0-9-])`, "i").test(body)),
+			mentioned: githubMentioned,
 			onSubscribedTicket: async (ticket) => {
 				if (ticket.status !== "review" || ticket.paused) return;
-				await db.ticket.update(ticket.id, {
-					status: "waiting",
-					updatedAt: now()
-				});
 				await db.worker.queue(ticket.id, ticket.projectId).catch(() => void 0);
 			}
 		},
@@ -1151,6 +1331,7 @@ const pull = defineService({
 			};
 			let ciState = previous?.head === head ? previous.ciState : "pending";
 			let ciError;
+			let ciLocation;
 			let snapshot;
 			try {
 				snapshot = await ci$1.snapshot(remote, root, head, signal);
@@ -1158,6 +1339,7 @@ const pull = defineService({
 			} catch (error) {
 				if (signal?.aborted) throw error;
 				ciError = courier.failure(error, false);
+				ciLocation = `pull:${target.number}:ci`;
 			}
 			const fact = {
 				head,
@@ -1170,19 +1352,17 @@ const pull = defineService({
 				url: text(detail.html_url)
 			};
 			await courier.record("github", target.repository, `pr_fact:${target.number}`, fact);
-			const branch = typeof record(detail.head).ref === "string" ? text(record(detail.head).ref) : null;
-			const worker = branch ? await db.worker.findByBranch(branch) : void 0;
-			const owned = worker && await db.ticket.findById(worker.ticketId);
-			if (owned?.projectId === projectId && (!owned.prUrl || owned.prUrl === thread.url)) {
-				await db.ticketThread.link(owned.id, thread.id, now());
-				await db.ticket.setPullRequest(owned.id, thread.url, state, ciState);
+			if (typeof detail.title === "string" && detail.title && thread.title !== detail.title) await db.thread.setTitle(thread.id, detail.title);
+			for (const ticket of await db.ticket.listByPullRequest(projectId, thread.url)) {
+				await db.ticketThread.link(ticket.id, thread.id, now());
+				await db.ticket.setPullRequest(ticket.id, thread.url, state, ciState);
 			}
 			const subscriptions = await db.ticketThread.listTicketIds(thread.id);
 			for (const ticketId of subscriptions) {
 				const ticket = await db.ticket.findById(ticketId);
 				if (ticket?.projectId === projectId && ticket.prUrl === thread.url) await db.ticket.setPullRequest(ticketId, thread.url, state, ciState);
 			}
-			if (state === "merged" || state === "closed") await pull.closed(remote, projectId, thread, state, detail.merged === true ? timestamp(detail.merged_at ?? detail.closed_at ?? detail.updated_at) : timestamp(detail.closed_at ?? detail.updated_at), branch);
+			if (state === "merged" || state === "closed") await pull.closed(remote, projectId, thread, state, detail.merged === true ? timestamp(detail.merged_at ?? detail.closed_at ?? detail.updated_at) : timestamp(detail.closed_at ?? detail.updated_at));
 			const fingerprint = digest({
 				head,
 				state,
@@ -1203,7 +1383,7 @@ const pull = defineService({
 			});
 			const triggerId = `${watch.id}:revision:${watch.revision}`;
 			const message = `PR #${target.number}: ${state}, CI ${ciState}${ciError ? ` (${ciError})` : ""}`;
-			await db.trigger.ingest({
+			if (!await db.trigger.exists(triggerId)) await db.trigger.ingest({
 				id: triggerId,
 				channelId: "github",
 				threadId,
@@ -1218,7 +1398,11 @@ const pull = defineService({
 			});
 			for (const ticketId of subscriptions) {
 				const ticket = await db.ticket.findById(ticketId);
-				if (ticket?.projectId === projectId && !["done", "cancelled"].includes(ticket.status)) await db.inbox.enqueue({
+				if (ticket?.projectId === projectId && ![
+					"done",
+					"completed",
+					"cancelled"
+				].includes(ticket.status)) await db.inbox.enqueue({
 					id: `${triggerId}:ticket:${ticketId}`,
 					type: "project",
 					origin: "system",
@@ -1233,18 +1417,20 @@ const pull = defineService({
 			}
 			return {
 				ok: !ciError,
-				...ciError ? { reason: ciError } : {}
+				...ciError ? {
+					reason: ciError,
+					location: ciLocation
+				} : {}
 			};
 		});
 	},
-	async closed(remote, projectId, thread, outcome, at, branch) {
+	async closed(remote, projectId, thread, outcome, at) {
 		await closeThread({
 			channel: "github",
 			projectId,
 			thread,
 			outcome,
 			at,
-			branch,
 			closeIssue: async (url) => {
 				const target = resource$1.parse(url);
 				if (target.kind !== "issue") return;
@@ -1285,10 +1471,28 @@ var GitHubChannel = class {
 		if (!project.enabled) throw new GhError("project_disabled");
 		return project;
 	}
+	/** 仓库唯一对应一个启用项目时返回它；没有项目或不止一个都不猜。 */
+	async bindingProject(repository) {
+		const projects = (await db.project.listAll()).filter((project) => project.enabled && resource$1.of(project.remoteUrl) === repository);
+		return projects.length === 1 ? projects[0].id : null;
+	}
 	async projectForRepository(repository) {
-		const projects = (await db.project.listAll()).filter((project) => resource$1.of(project.remoteUrl) === repository);
+		const match = async (name) => (await db.project.listAll()).filter((project) => resource$1.of(project.remoteUrl) === name);
+		let projects = await match(repository);
+		if (!projects.length) {
+			const canonical = await this.canonicalRepository(repository);
+			if (canonical) projects = await match(canonical);
+		}
 		if (projects.length !== 1) throw new GhError(projects.length ? "ambiguous_repository" : "unknown_repository");
 		return projects[0];
+	}
+	async canonicalRepository(repository) {
+		try {
+			const remote = record(await this.request(`repos/${repository}`));
+			return resource$1.renamed(repository, text(remote.full_name));
+		} catch {
+			return null;
+		}
 	}
 	async probe(projectId, signal) {
 		const project = await this.project(projectId);
@@ -1362,23 +1566,26 @@ var GitHubChannel = class {
 	}
 	async collectProject(context, signal) {
 		const repo = context.scope;
-		const { attempt, baseline, environment } = context;
-		await attempt(() => this.stream(repo, "topics", `repos/${repo}/issues?state=all&sort=updated&direction=asc`, baseline, async (row) => {
+		const { attempt, fail, baseline, environment } = context;
+		const owner = await this.bindingProject(repo);
+		if (owner) await bindThreads({
+			channel: "github",
+			refPrefix: `${repo}:`,
+			projectId: owner
+		});
+		await attempt("topics", () => this.stream(repo, "topics", `repos/${repo}/issues?state=all&sort=updated&direction=asc`, baseline, async (row) => {
 			const target = {
 				repository: repo,
 				number: number(row.number),
 				kind: row.pull_request ? "pull" : "issue"
 			};
 			resource$1.validate(row, target);
-			const thread = await this.ensureThread(target, row);
+			const thread = await this.ensureThread(target, row, owner);
 			const kind = target.kind === "issue" && row.state === "closed" ? "close" : "open";
 			await courier.ingest(this.ingestor, thread, row, kind, baseline, kind);
-			if (target.kind === "pull") {
-				const result = await this.collectPullRequest(context.projectId, thread.id, signal);
-				if (!result.ok) throw new GhError(result.reason);
-			}
+			if (target.kind === "pull") await this.collectPullRequest(context.projectId, thread.id, target.number, signal);
 		}, signal));
-		await attempt(() => this.stream(repo, "comments", `repos/${repo}/issues/comments?sort=updated&direction=asc`, baseline, async (row) => {
+		await attempt("comments", () => this.stream(repo, "comments", `repos/${repo}/issues/comments?sort=updated&direction=asc`, baseline, async (row) => {
 			const match = /^https:\/\/api\.github\.com\/repos\/([^/]+\/[^/]+)\/issues\/(\d+)$/.exec(text(row.issue_url));
 			if (!match || match[1].toLowerCase() !== repo) throw new GhError("source_repository_mismatch");
 			const thread = await db.thread.findByRef("github", `${repo}:${match[2]}`);
@@ -1392,22 +1599,31 @@ var GitHubChannel = class {
 			const ticketIds = await db.ticketThread.listTicketIds(thread.id);
 			if (!ticketIds.length) continue;
 			if (!await courier.polled(ticketIds, thread.updatedAt)) continue;
-			if ((await Promise.all(ticketIds.map((id) => db.ticket.findById(id)))).every((ticket) => !!ticket && ["done", "cancelled"].includes(ticket.status) && !!ticket.prState && ["merged", "closed"].includes(ticket.prState))) continue;
-			await attempt(async () => {
-				const target = resource$1.parse(thread.url);
-				if (target.repository !== repo) return;
+			if ((await Promise.all(ticketIds.map((id) => db.ticket.findById(id)))).every((ticket) => !!ticket && [
+				"done",
+				"completed",
+				"cancelled"
+			].includes(ticket.status) && !!ticket.prState && ["merged", "closed"].includes(ticket.prState))) continue;
+			let target;
+			try {
+				target = resource$1.parse(thread.url);
+			} catch (error) {
+				fail(error, "pull");
+				continue;
+			}
+			if (target.repository !== repo) continue;
+			await attempt(`pull:${target.number}`, async () => {
 				const root = `repos/${repo}/pulls/${target.number}`;
-				for (const [path, kind] of [["reviews", "review"], ["comments", "review_comment"]]) await attempt(async () => {
+				for (const [path, kind] of [["reviews", "review"], ["comments", "review_comment"]]) await attempt(`pull:${target.number}:${path}`, async () => {
 					await this.stream(repo, `pull:${target.number}:${path}`, `${root}/${path}?sort=updated&direction=asc`, baseline, async (row) => {
 						await courier.answers(this.answerer, thread, row);
 						await courier.ingest(this.ingestor, thread, row, "comment", baseline, kind);
 					}, signal);
 				});
-				const result = await this.collectPullRequest(context.projectId, thread.id, signal);
-				if (!result.ok) throw new GhError(result.reason);
+				await this.collectPullRequest(context.projectId, thread.id, target.number, signal);
 			});
 		}
-		if (environment.defaultBranch) await attempt(() => ci$1.branch(this, context.projectId, environment.defaultBranch, signal));
+		if (environment.defaultBranch) await attempt("ci", () => ci$1.branch(this, context.projectId, environment.defaultBranch, signal));
 	}
 	async stream(repository, name, path, baseline, accept, signal) {
 		await courier.stream({
@@ -1436,7 +1652,7 @@ var GitHubChannel = class {
 			signal
 		});
 	}
-	async ensureThread(target, row) {
+	async ensureThread(target, row, projectId) {
 		return recordThread({
 			channel: "github",
 			refId: `${target.repository}:${target.number}`,
@@ -1444,11 +1660,18 @@ var GitHubChannel = class {
 			title: text(row.title),
 			url: text(row.html_url),
 			createdAt: timestamp(row.created_at),
-			updatedAt: timestamp(row.updated_at)
+			updatedAt: timestamp(row.updated_at),
+			projectId
 		});
 	}
-	async collectPullRequest(projectId, threadId, signal) {
-		return pull.collect(this, projectId, threadId, signal);
+	async collectPullRequest(projectId, threadId, number, signal) {
+		try {
+			const result = await pull.collect(this, projectId, threadId, signal);
+			if (!result.ok) throw new GhError(result.reason, void 0, result.location ?? `pull:${number}`);
+		} catch (error) {
+			if (error instanceof ChannelError && !error.location) error.location = `pull:${number}`;
+			throw error;
+		}
 	}
 	async publish(inboxId, signal) {
 		return courier.publish(this.delivery, inboxId, signal);
@@ -1535,18 +1758,65 @@ function gitlabSite(host) {
 	} catch {
 		throw new GitLabError("invalid_channel_host");
 	}
-	if (url.protocol !== "https:" || url.username || url.password || url.pathname !== "/" || url.search || url.hash) throw new GitLabError("invalid_channel_host");
+	if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.pathname !== "/" || url.search || url.hash) throw new GitLabError("invalid_channel_host");
 	return url.origin;
+}
+// src/channel/gitlab/service/hosts.ts
+const STATE = "web_hosts";
+let stored = null;
+let loading;
+/**
+* 自建 GitLab 常把 API 放在 IP、`external_url` 用域名，API 返回的 `web_url` 因此与配置的站点不同源。
+* 这里保存从已认证 API 学到的网页 host，让同一实例的两种形态都能解析。
+*/
+const hosts = defineService({
+	ready() {
+		loading ??= load();
+		return loading;
+	},
+	allowed(site) {
+		const configured = new URL(gitlabSite(site));
+		const aliases = stored?.site === configured.origin ? stored.hosts : [];
+		return [.../* @__PURE__ */ new Set([configured.host, ...aliases])];
+	},
+	async learn(site, webUrl) {
+		const configured = new URL(gitlabSite(site));
+		let host;
+		try {
+			host = new URL(webUrl).host;
+		} catch {
+			return;
+		}
+		const aliases = stored?.site === configured.origin ? stored.hosts : [];
+		if (!host || host === configured.host || aliases.includes(host)) return;
+		const next = {
+			site: configured.origin,
+			hosts: [...aliases, host]
+		};
+		stored = next;
+		await db.sourceState.set("gitlab", STATE, JSON.stringify(next), (/* @__PURE__ */ new Date()).toISOString());
+	}
+});
+async function load() {
+	const row = await db.sourceState.find("gitlab", STATE);
+	if (!row) return;
+	try {
+		const value = JSON.parse(row.value);
+		if (value && typeof value === "object" && !Array.isArray(value) && "site" in value && "hosts" in value && typeof value.site === "string" && Array.isArray(value.hosts)) stored = {
+			site: value.site,
+			hosts: value.hosts.filter((host) => typeof host === "string")
+		};
+	} catch {}
 }
 // src/channel/gitlab/service/resource.ts
 const resource = defineService({
 	remote(remoteUrl, host) {
 		if (!remoteUrl) return null;
 		const site = gitlabSite(host);
-		const configured = new URL(site);
+		const allowed = hosts.allowed(site);
 		const scp = /^git@([^/:]+):(.+)$/.exec(remoteUrl);
 		if (scp) {
-			if (scp[1].toLowerCase() !== configured.hostname || configured.port) return null;
+			if (!allowed.some((entry) => hostnameOf(entry) === scp[1].toLowerCase())) return null;
 			const repository = resource.path(scp[2].replace(/\.git$/, ""));
 			return repository ? {
 				site,
@@ -1555,7 +1825,12 @@ const resource = defineService({
 		}
 		try {
 			const url = new URL(remoteUrl);
-			if (!["https:", "ssh:"].includes(url.protocol) || url.hostname !== configured.hostname || url.password || url.search || url.hash || (url.protocol === "https:" ? url.origin !== site || Boolean(url.username) : Boolean(url.port) || Boolean(url.username && url.username !== "git"))) return null;
+			if (![
+				"http:",
+				"https:",
+				"ssh:"
+			].includes(url.protocol) || !allowed.includes(url.host) || url.password || url.search || url.hash) return null;
+			if (url.protocol === "ssh:" ? url.username !== "git" : Boolean(url.username)) return null;
 			const repository = resource.path(url.pathname.replace(/^\//, "").replace(/\/$/, "").replace(/\.git$/, ""));
 			return repository ? {
 				site,
@@ -1591,7 +1866,7 @@ const resource = defineService({
 		const match = /^\/(.+?)(?:\/-\/(issues|work_items|merge_requests)|\/(issues|merge_requests))\/([1-9]\d*)\/?$/.exec(url.pathname);
 		const repository = match && resource.path(match[1]);
 		const number = Number(match?.[4]);
-		if (url.origin !== site || url.protocol !== "https:" || url.username || url.password || url.search || url.hash && !/^#note_[1-9]\d*$/.test(url.hash) || !repository || !Number.isSafeInteger(number)) throw new GitLabError("invalid_resource");
+		if (!["http:", "https:"].includes(url.protocol) || !hosts.allowed(site).includes(url.host) || url.username || url.password || url.search || url.hash && !/^#note_[1-9]\d*$/.test(url.hash) || !repository || !Number.isSafeInteger(number)) throw new GitLabError("invalid_resource");
 		return {
 			site,
 			repository,
@@ -1650,6 +1925,13 @@ const resource = defineService({
 		};
 	}
 });
+function hostnameOf(host) {
+	try {
+		return new URL(`http://${host}`).hostname;
+	} catch {
+		return host;
+	}
+}
 // src/channel/gitlab/service/ci.ts
 const ci = defineService({
 	async branch(remote, projectId, branch, signal) {
@@ -1704,7 +1986,7 @@ function collectPort(channel) {
 	return {
 		channel: "gitlab",
 		detail: true,
-		status: false,
+		status: true,
 		scope: (project) => channel.scopeOf(project),
 		project: (projectId) => channel.project(projectId),
 		probe: (projectId, signal) => channel.probe(projectId, signal),
@@ -1749,9 +2031,9 @@ function ingestPort() {
 		body: (row) => typeof row.body === "string" ? row.body : typeof row.description === "string" ? row.description : typeof row.state === "string" ? row.state : "",
 		url: (row, sourceKind, thread) => sourceKind === "note" ? `${thread.url}#note_${identity(row.id)}` : text(row.web_url),
 		ref: (row) => typeof row.source_branch === "string" ? row.source_branch : null,
-		at: (row) => timestamp(row.updated_at ?? row.created_at),
+		at: (row, kind) => kind === "close" ? timestamp(row.closed_at ?? row.updated_at ?? row.created_at) : timestamp(row.created_at),
 		createdAt: (row) => timestamp(row.created_at),
-		mentioned: (body, bots) => bots.some((bot) => new RegExp(`(?:^|[^a-z0-9_@])@${escapeRegex(bot.name)}(?![a-z0-9_.-])`, "i").test(body))
+		mentioned: gitlabMentioned
 	};
 }
 function answerPort(channel) {
@@ -1775,20 +2057,22 @@ const mergeRequest = defineService({ async observe(remote, projectId, thread, ro
 	resource.validateTopic(row, target);
 	const state = row.state === "merged" ? "merged" : row.state === "closed" ? "closed" : row.state === "opened" ? "open" : null;
 	if (!state) throw new GitLabError("invalid_response");
-	const branch = typeof row.source_branch === "string" ? text(row.source_branch) : null;
-	const worker = branch ? await db.worker.findByBranch(branch) : void 0;
-	const owned = worker && await db.ticket.findById(worker.ticketId);
-	if (owned?.projectId === projectId && (!owned.prUrl || owned.prUrl === thread.url)) {
-		await db.ticketThread.link(owned.id, thread.id, now());
-		await db.ticket.setPullRequest(owned.id, thread.url, state, owned.ciState);
+	if (typeof row.title === "string" && row.title && thread.title !== row.title) await db.thread.setTitle(thread.id, row.title);
+	for (const ticket of await db.ticket.listByPullRequest(projectId, thread.url)) {
+		await db.ticketThread.link(ticket.id, thread.id, now());
+		await db.ticket.setPullRequest(ticket.id, thread.url, state, ticket.ciState);
 	}
 	for (const ticketId of await db.ticketThread.listTicketIds(thread.id)) {
 		const ticket = await db.ticket.findById(ticketId);
-		if (!ticket || ticket.projectId !== projectId || ticket.prUrl !== thread.url || ["done", "cancelled"].includes(ticket.status)) continue;
+		if (!ticket || ticket.projectId !== projectId || ticket.prUrl !== thread.url || [
+			"done",
+			"completed",
+			"cancelled"
+		].includes(ticket.status)) continue;
 		await db.ticket.setPullRequest(ticketId, thread.url, state, ticket.ciState);
 	}
 	if (state === "open") return;
-	await remote.threadClosed(projectId, thread, state, timestamp(row.merged_at ?? row.closed_at ?? row.updated_at), branch);
+	await remote.threadClosed(projectId, thread, state, timestamp(row.merged_at ?? row.closed_at ?? row.updated_at));
 } });
 // src/channel/gitlab/channel.ts
 const INITIAL_CURSOR = { since: "1970-01-01T00:00:00.000Z" };
@@ -1800,6 +2084,7 @@ var GitLabChannel = class {
 		this.ports = binding.of(this);
 	}
 	async site() {
+		await hosts.ready();
 		return gitlabSite((await db.channel.findById("gitlab"))?.host ?? null);
 	}
 	async normalize(value) {
@@ -1830,6 +2115,11 @@ var GitLabChannel = class {
 		if (project$1.available === false) throw new GitLabError("project_unavailable");
 		return project$1;
 	}
+	/** 仓库唯一对应一个启用项目时返回它；没有项目或不止一个都不猜。 */
+	async bindingProject(site, repository) {
+		const projects = (await db.project.listAll()).filter((project) => project.enabled && resource.remote(project.remoteUrl, site)?.repository === repository);
+		return projects.length === 1 ? projects[0].id : null;
+	}
 	async projectForRepository(repository) {
 		const site = await this.site();
 		const matches = (await project.list()).filter((project) => {
@@ -1850,6 +2140,7 @@ var GitLabChannel = class {
 		const channel = await db.channel.findById("gitlab");
 		if (!channel?.enabled) throw new GitLabError("channel_disabled");
 		const site = gitlabSite(channel.host);
+		await hosts.ready();
 		const target = resource.remote(project.remoteUrl, site);
 		const bots = (await db.channelAccount.findByRole("gitlab", "bot")).filter((account) => account.status === "online");
 		const account = record(await this.request(site, "user", signal));
@@ -1857,7 +2148,9 @@ var GitLabChannel = class {
 		const login = text(account.username);
 		if (!bots.some((bot) => bot.name.toLowerCase() === login.toLowerCase()) || account.state !== void 0 && account.state !== "active") throw new GitLabError("account_mismatch");
 		const remote = record(await this.request(site, `projects/${encodeURIComponent(target.repository)}`, signal));
-		if (text(remote.path_with_namespace) !== target.repository || resource.source(resource.remote(text(remote.web_url), site) ?? {
+		const webUrl = text(remote.web_url);
+		await hosts.learn(site, webUrl);
+		if (text(remote.path_with_namespace) !== target.repository || resource.source(resource.remote(webUrl, site) ?? {
 			site: "",
 			repository: ""
 		}) !== resource.source(target)) throw new GitLabError("repository_mismatch");
@@ -1887,14 +2180,19 @@ var GitLabChannel = class {
 		};
 	}
 	async pages(site, path, signal, since, etag) {
-		const stamp = since && /\/projects\/[^/]+\/(?:issues|merge_requests)(?:\?|$)/.test(path) ? `&updated_after=${encodeURIComponent(since)}` : "";
+		const stamp = since && /(?:^|\/)projects\/[^/]+\/(?:issues|merge_requests)(?:\?|$)/.test(path) ? `&updated_after=${encodeURIComponent(since)}` : "";
 		return courier.pages(async (page) => {
 			const url = `${path + (path.includes("?") ? "&" : "?")}per_page=100&page=${page}${stamp}`;
 			const headers = page === 1 && etag ? { "if-none-match": etag } : void 0;
 			const value = await this.requestValue(site, url, signal, headers);
+			if (value.notModified) return {
+				rows: [],
+				notModified: true,
+				etag: value.etag
+			};
 			return {
 				rows: array(value.body).map(record),
-				notModified: value.notModified,
+				notModified: false,
 				etag: value.etag
 			};
 		});
@@ -1929,24 +2227,34 @@ var GitLabChannel = class {
 	}
 	async collectProject(context, signal) {
 		const site = await this.site();
-		const repository = context.scope;
-		for (const kind of ["issue", "pull"]) await context.attempt(async () => {
+		const scope = context.scope;
+		const project = await this.project(context.projectId);
+		const target = resource.remote(project.remoteUrl, site);
+		if (!target) throw new GitLabError("unknown_repository");
+		const repository = target.repository;
+		const owner = await this.bindingProject(site, repository);
+		if (owner) await bindThreads({
+			channel: "gitlab",
+			refPrefix: `${resource.source(target)}:`,
+			projectId: owner
+		});
+		for (const kind of ["issue", "pull"]) await context.attempt(kind, async () => {
 			await courier.stream({
 				channel: "gitlab",
-				scope: repository,
+				scope,
 				name: kind,
 				initial: INITIAL_CURSOR,
 				read: (cursor) => this.pages(site, `projects/${encodeURIComponent(repository)}/${kind === "issue" ? "issues" : "merge_requests"}?state=all&scope=all&order_by=updated_at&sort=asc`, signal, cursor.since, cursor.etag ?? void 0),
 				advance: (cursor, rows, startedAt) => this.advance(cursor, rows, startedAt),
 				accept: async (row) => {
-					const target = {
+					const resourceTarget = {
 						site,
 						repository,
 						kind,
 						number: number(row.iid)
 					};
-					resource.validateTopic(row, target);
-					const thread = await this.ensureThread(target, row);
+					resource.validateTopic(row, resourceTarget);
+					const thread = await this.ensureThread(resourceTarget, row, owner);
 					await courier.ingest(this.ports.ingest, thread, row, row.state === "closed" || row.state === "merged" ? "close" : "open", context.baseline, kind);
 					if (kind === "pull") await mergeRequest.observe(this, context.projectId, thread, row);
 				},
@@ -1956,19 +2264,24 @@ var GitLabChannel = class {
 		for (const thread of await db.thread.listByChannel("gitlab")) {
 			const url = thread.url;
 			if (!url || !["issue", "pull"].includes(thread.kind)) continue;
-			if (!await courier.polled(await db.ticketThread.listTicketIds(thread.id), thread.updatedAt)) continue;
-			await context.attempt(async () => {
-				const target = resource.parse(url, site);
-				if (resource.source(target) !== repository) return;
+			const ticketIds = await db.ticketThread.listTicketIds(thread.id);
+			if (!await courier.polled(ticketIds, thread.updatedAt)) continue;
+			await context.attempt(thread.refId, async () => {
+				const threadTarget = resource.parse(url, site);
+				if (threadTarget.repository !== repository) return;
+				if (threadTarget.kind === "pull" && ticketIds.length) {
+					const current = record(await this.request(site, resource.apiRoot(threadTarget), signal));
+					await mergeRequest.observe(this, context.projectId, thread, current);
+				}
 				await courier.stream({
 					channel: "gitlab",
-					scope: repository,
-					name: `notes:${target.kind}:${target.number}`,
+					scope,
+					name: `notes:${threadTarget.kind}:${threadTarget.number}`,
 					initial: INITIAL_CURSOR,
-					read: (cursor) => this.pages(site, `${resource.apiRoot(target)}/notes?sort=asc&order_by=updated_at`, signal, cursor.since, cursor.etag ?? void 0),
+					read: (cursor) => this.pages(site, `${resource.apiRoot(threadTarget)}/notes?sort=asc&order_by=updated_at`, signal, cursor.since, cursor.etag ?? void 0),
 					advance: (cursor, rows, startedAt) => this.advance(cursor, rows, startedAt),
 					accept: async (row) => {
-						resource.validateNote(row, target);
+						resource.validateNote(row, threadTarget);
 						await courier.answers(this.ports.answer, thread, row);
 						await courier.ingest(this.ports.ingest, thread, row, "comment", context.baseline, "note");
 					},
@@ -1988,10 +2301,10 @@ var GitLabChannel = class {
 			await ci.branch(this, context.projectId, branch, signal);
 		} catch (error) {
 			if (signal?.aborted) return;
-			context.fail(new GitLabError(`ci:${courier.failure(error, true)}`));
+			context.fail(error, `ci:${branch}`);
 		}
 	}
-	async ensureThread(target, row) {
+	async ensureThread(target, row, projectId) {
 		return recordThread({
 			channel: "gitlab",
 			refId: `${resource.source(target)}:${target.kind}:${target.number}`,
@@ -1999,17 +2312,17 @@ var GitLabChannel = class {
 			title: text(row.title),
 			url: text(row.web_url),
 			createdAt: timestamp(row.created_at),
-			updatedAt: timestamp(row.updated_at)
+			updatedAt: timestamp(row.updated_at),
+			projectId
 		});
 	}
-	async threadClosed(projectId, thread, outcome, at, branch) {
+	async threadClosed(projectId, thread, outcome, at) {
 		await closeThread({
 			channel: "gitlab",
 			projectId,
 			thread,
 			outcome,
 			at,
-			branch,
 			closeIssue: async (url) => {
 				const target = resource.parse(url, await this.site());
 				if (target.kind !== "issue") return;
@@ -2161,7 +2474,7 @@ const reply_channel = defineTool({
 		if (identity.role === "project" && thread.projectId !== identity.projectId) {
 			if (!(await Promise.all((await db.ticketThread.listByThread(thread.id)).map((link) => db.ticket.findById(link.ticketId)))).some((ticket) => ticket?.projectId === identity.projectId)) throw new Error("触发不属于当前项目");
 		}
-		if ((await db.inbox.listByThread(thread.id)).some((message) => message.triggerId === trigger.id && message.origin !== identity.role)) return JSON.stringify({
+		if (await db.inbox.repliedByOther(thread.id, trigger.id, identity.role)) return JSON.stringify({
 			status: "suppressed",
 			reason: "another_role_already_replied"
 		});
@@ -2209,7 +2522,7 @@ const inbox_list = defineTool({
 		}]
 	},
 	execute: async (args, exec) => {
-		const mailbox = await inbox.read(exec.agent?.session.id ?? "", true);
+		const mailbox = await inbox.read(exec.agent?.session.id ?? "");
 		return JSON.stringify(args.detail ? mailbox.messages : mailbox.messages.map((row) => ({
 			id: row.id,
 			kind: row.kind,
@@ -2219,7 +2532,7 @@ const inbox_list = defineTool({
 });
 const read_mailbox = defineTool({
 	name: "read_mailbox",
-	description: "读取当前角色未处理邮件，以及可用项目的 id、仓库地址和本地路径。可传 ids 一次读取指定多条邮件。渠道邮件带 trigger 事实（actor / human / mentioned）：mentioned=no 只是时间线记录，不是开工请求。读取标为已读，处理完用 inbox_kill，ask 必须用 answer。",
+	description: "读取当前角色未处理邮件，以及可用项目的 id、仓库地址、归一化仓库名和本地路径。可传 ids 一次读取指定多条邮件。投递失败的对外回复也会出现在这里，可用 inbox_kill 放弃。渠道邮件带 trigger 事实（actor / human / mentioned / strength）和 thread 事实（triage / project / repository）：thread.project 是服务端按仓库匹配好的归属，为空表示没有启用项目对应这个仓库。strength=inferred 只是候选，只能分诊记录，不能建票；strength=self 是你自己开的 issue，可以直接建票。读取标为已读，处理完用 inbox_kill，ask 必须用 answer。",
 	parameters: { ids: {
 		type: "array",
 		items: { type: "string" },
@@ -2235,7 +2548,7 @@ const read_mailbox = defineTool({
 			text: value
 		}]
 	},
-	execute: async (args, exec) => JSON.stringify(await inbox.read(exec.agent?.session.id ?? "", true, args.ids))
+	execute: async (args, exec) => JSON.stringify(await inbox.read(exec.agent?.session.id ?? "", args.ids))
 });
 const inbox_kill = defineTool({
 	name: "inbox_kill",
@@ -2256,7 +2569,7 @@ const inbox_kill = defineTool({
 			text: value
 		}]
 	},
-	execute: async (args, exec) => String(await inbox.complete(exec.agent?.session.id ?? "", args.ids, true))
+	execute: async (args, exec) => String(await inbox.complete(exec.agent?.session.id ?? "", args.ids))
 });
 // src/ai/manager/tools/communicate.ts
 const report$2 = defineTool({
@@ -2440,11 +2753,12 @@ const list_ticket$2 = defineTool({
 		status: {
 			type: "string",
 			enum: [
-				"waiting",
 				"queued",
 				"running",
+				"idle",
 				"review",
 				"done",
+				"completed",
 				"cancelled"
 			],
 			description: "只看某个状态；省略表示不含已终态的票。"
@@ -2492,7 +2806,7 @@ const link_ticket$1 = defineTool({
 			type: "string",
 			enum: ["depends", "relates"],
 			required: true,
-			description: "depends 前置依赖：relatedId 没做完，ticketId 停在 waiting。relates 只是相关，谁都不等谁。"
+			description: "depends 前置依赖：relatedId 没做完，ticketId 停在 queued。relates 只是相关，谁都不等谁。"
 		}
 	},
 	output: {
@@ -2513,10 +2827,11 @@ const link_ticket$1 = defineTool({
 		if (!related || related.projectId !== identity.projectId) throw new Error("跨项目关联应由 Supervisor 处理");
 		if (ticket.id === related.id) throw new Error("工单不能关联自己");
 		await db.ticketLink.link(ticket.id, related.id, args.kind, (/* @__PURE__ */ new Date()).toISOString());
-		if (args.kind === "depends" && related.status !== "done" && related.status !== "cancelled") await db.ticket.save(ticket.id, {
-			status: "waiting",
-			updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-		});
+		if (args.kind === "depends" && ![
+			"done",
+			"completed",
+			"cancelled"
+		].includes(related.status)) await db.ticket.setOpenStatus(ticket.id, "queued", (/* @__PURE__ */ new Date()).toISOString());
 		return JSON.stringify({ linked: true });
 	}
 });
@@ -2556,13 +2871,14 @@ const stop_ticket = defineTool({
 		const trigger = await db.trigger.findById(args.triggerId);
 		if (!trigger || trigger.human !== 1) throw new Error("停止工单必须绑定 human=true 的触发");
 		if (!(await db.ticketThread.listByTicket(ticket.id)).some((row) => row.threadId === trigger.threadId)) throw new Error("停止触发不属于当前工单来源");
-		for (const worker of await db.worker.listByTicket(ticket.id)) {
-			if (worker.status === "ended") continue;
-			if (worker.status === "running") await session.cancel(worker.id);
-			await db.worker.end(worker.id, "stopped", (/* @__PURE__ */ new Date()).toISOString());
-		}
 		const now = (/* @__PURE__ */ new Date()).toISOString();
 		await db.ticket.finish(ticket.id, "cancelled", now, now);
+		for (const worker of await db.worker.listByTicket(ticket.id)) {
+			if (worker.status === "ended") continue;
+			if (worker.status === "running") await session.cancel(worker.id).catch(() => void 0);
+			await db.worker.end(worker.id, "stopped", (/* @__PURE__ */ new Date()).toISOString());
+		}
+		await worker$1.archiveSessions(ticket.id);
 		await db.inbox.returnPendingTicket(ticket.id, args.reason ?? "人类要求停止", now);
 		for (const link of await db.supervisorTicket.listByTicket(ticket.id)) await db.inbox.enqueue({
 			type: "supervisor",
@@ -2611,7 +2927,6 @@ const retry_ticket = defineTool({
 			branch: old.branch,
 			worktree: old.worktree
 		});
-		await db.ticket.setPrepareError(ticket.id, null, (/* @__PURE__ */ new Date()).toISOString());
 		await worker$1.reconcile();
 		return JSON.stringify(await db.worker.findById(worker.id));
 	}
@@ -2628,7 +2943,8 @@ const create_worker = defineTool({
 		},
 		branch: {
 			type: "string",
-			description: "分支名，省略则用 dsh/<任务号>。末段必须是任务号，PR 归哪张票就靠这个字符串比对。"
+			required: true,
+			description: "分支名称（英文）将会自动拼接为 dsh/[分支名称]"
 		}
 	},
 	output: {
@@ -2644,8 +2960,7 @@ const create_worker = defineTool({
 	execute: async (args, exec) => {
 		const identity = await session.resolve(exec.agent?.session.id ?? "");
 		if (identity?.role !== "project" || !identity.projectId) throw new Error("仅项目编排可调用");
-		const worker = await db.worker.queue(args.ticketId, identity.projectId, args.branch);
-		await db.ticket.setPrepareError(args.ticketId, null, (/* @__PURE__ */ new Date()).toISOString());
+		const worker = await db.worker.queue(args.ticketId, identity.projectId, `dsh/${args.branch}`);
 		await worker$1.reconcile();
 		return JSON.stringify(await db.worker.findById(worker.id));
 	}
@@ -2672,7 +2987,7 @@ const send = defineTool({
 				"reply"
 			],
 			required: true,
-			description: "queue 也直接 steer 到最近一步；interrupt 中止当前回合再 steer；reply 回答它的 ask 并直接 steer。"
+			description: "queue 在 Worker 运行中 steer 到最近一步，空闲时开新回合；interrupt 中止当前回合再 steer；reply 回答它的 ask，投递规则同 queue。"
 		}
 	},
 	output: {
@@ -2692,8 +3007,6 @@ const send = defineTool({
 		if (!worker) throw new Error("Worker 不存在");
 		const ticket = await db.ticket.findById(worker.ticketId);
 		if (!ticket || ticket.projectId !== identity.projectId) throw new Error("Worker 不属于当前项目");
-		if (worker.status === "ended") throw new Error("Worker 已结束");
-		if (!await session.lookup(worker.id)) throw new Error("Worker 未在运行时加载、已归档或不属于 Supermesh；不能直接发送");
 		if (args.mode === "reply") {
 			const asks = (await db.inbox.listByTicket(ticket.id)).filter((row) => row.workerId === worker.id && row.kind === "ask" && row.status === "pending");
 			if (asks.length !== 1 || !db.inbox.owns(asks[0], {
@@ -2704,12 +3017,15 @@ const send = defineTool({
 				type: "project",
 				projectId: identity.projectId
 			}, (/* @__PURE__ */ new Date()).toISOString());
-			await session.send(worker.id, `[Answer ${asks[0].id}] ${args.text}`, "reply", `supermesh:answer:${asks[0].id}`);
-		} else await session.send(worker.id, args.text, args.mode);
-		return JSON.stringify({
-			sent: true,
-			mode: args.mode
-		});
+			return JSON.stringify({
+				askId: asks[0].id,
+				delivery: "queued"
+			});
+		}
+		if (worker.status === "ended") throw new Error("Worker 已结束");
+		if (!await session.lookup(worker.id)) throw new Error("Worker 未在运行时加载、已归档或不属于 Supermesh；不能直接发送");
+		const messageId = await session.send(worker.id, args.text, args.mode === "interrupt" ? "interrupt" : "wake");
+		return JSON.stringify({ messageId });
 	}
 });
 const view = defineTool({
@@ -2747,7 +3063,7 @@ const view = defineTool({
 });
 const cancel = defineTool({
 	name: "cancel",
-	description: "中止 Worker 当前回合。那一次回合一并作废。票已结束也能停，只看 Worker 是否还活着。",
+	description: "中断 Worker 当前回合：那一次回合作废，会话不结束，之后还能用 send 继续。票已结束也能停，只看 Worker 是否还活着。",
 	parameters: {
 		workerId: {
 			type: "string",
@@ -2762,7 +3078,7 @@ const cancel = defineTool({
 	output: {
 		schema: {
 			type: "string",
-			description: "中止结果。"
+			description: "是否已受理。"
 		},
 		render: (_args, value) => [{
 			type: "text",
@@ -2778,48 +3094,45 @@ const cancel = defineTool({
 		if (!ticket || ticket.projectId !== identity.projectId) throw new Error("Worker 不属于当前项目");
 		if (worker.status === "ended") throw new Error("Worker 已结束");
 		await session.cancel(worker.id, args.keepInbox);
-		return JSON.stringify({ cancelled: true });
+		return JSON.stringify({ accepted: true });
 	}
 });
-const rename = defineTool({
-	name: "rename",
-	description: "改 Worker 会话的标题，方便在会话列表里认出来。",
-	parameters: {
-		workerId: {
-			type: "string",
-			required: true,
-			description: "要改名的 Worker。"
-		},
-		title: {
-			type: "string",
-			required: true,
-			description: "新标题。"
-		}
-	},
+const list_worker = defineTool({
+	name: "list_worker",
+	description: "列出本项目还没结束的 Worker 和当前回合状态。running 表示正在跑；inactive 表示没有回合在跑，可以 send 继续。",
+	parameters: {},
 	output: {
 		schema: {
 			type: "string",
-			description: "改名结果。"
+			description: "Worker 列表：id、票号、标题、状态。"
 		},
 		render: (_args, value) => [{
 			type: "text",
 			text: value
 		}]
 	},
-	execute: async (args, exec) => {
+	execute: async (_args, exec) => {
 		const identity = await session.resolve(exec.agent?.session.id ?? "");
 		if (identity?.role !== "project" || !identity.projectId) throw new Error("仅项目编排可调用");
-		const worker = await db.worker.findById(args.workerId);
-		if (!worker) throw new Error("Worker 不存在");
-		const ticket = await db.ticket.findById(worker.ticketId);
-		if (!ticket || ticket.projectId !== identity.projectId) throw new Error("Worker 不属于当前项目");
-		if (worker.status === "ended") throw new Error("Worker 已结束");
-		await session.rename(worker.id, args.title);
-		await db.worker.update(worker.id, { title: args.title });
-		return JSON.stringify({
-			id: worker.id,
-			title: args.title
-		});
+		const rows = [];
+		for (const ticket of await db.ticket.listByProject(identity.projectId)) {
+			if ([
+				"done",
+				"completed",
+				"cancelled"
+			].includes(ticket.status)) continue;
+			for (const worker of await db.worker.listByTicket(ticket.id)) {
+				if (worker.status === "ended") continue;
+				const agent = await session.lookup(worker.id);
+				rows.push({
+					id: worker.id,
+					ticketId: ticket.id,
+					title: ticket.title,
+					status: agent?.status === "running" ? "running" : "inactive"
+				});
+			}
+		}
+		return JSON.stringify(rows);
 	}
 });
 // src/ai/preset.ts
@@ -2862,7 +3175,7 @@ const manager = definePreset({
 		send,
 		view,
 		cancel,
-		rename
+		list_worker
 	],
 	plugins: [
 		agentInstructions,
@@ -2871,7 +3184,7 @@ const manager = definePreset({
 		skillFilesystem,
 		timeContext,
 		toolBash,
-		toolExecutorPtc,
+		toolRegistryPtc,
 		toolFs,
 		toolFsSearch,
 		toolJobs,
@@ -2885,7 +3198,7 @@ const manager = definePreset({
 // src/ai/_shared/tools/communicate.ts
 const answer = defineTool({
 	name: "answer",
-	description: "回答下面升上来的 ask：填 answer，标 status=done，答案送回发起方。",
+	description: "回答下面升上来的 ask：填 answer，标 status=done，答案由投递队列送回发起方。Worker 这一轮已结束也会被重新拉起；会话已归档才改投项目编排。",
 	parameters: {
 		askId: {
 			type: "string",
@@ -2901,7 +3214,7 @@ const answer = defineTool({
 	output: {
 		schema: {
 			type: "string",
-			description: "是否已回送。"
+			description: "答案 id、状态与投递去向。"
 		},
 		render: (_args, value) => [{
 			type: "text",
@@ -2920,17 +3233,11 @@ const answer = defineTool({
 			supervisorId: identity.supervisorId
 		} : identity.role === "main" ? { type: "main" } : null;
 		if (!scope) throw new Error("会话身份不完整");
-		const question = await db.inbox.findById(args.askId);
-		if (question?.origin === "worker") {
-			if (!question.workerId || !await session.lookup(question.workerId)) throw new Error("Worker 未在运行时加载、已归档或不属于 Supermesh；不能直接回答");
-			if ((await db.worker.findById(question.workerId))?.status === "ended") throw new Error("Worker 已结束");
-		}
-		const row = await db.inbox.answerScoped(args.askId, args.text, scope, (/* @__PURE__ */ new Date()).toISOString());
-		if (row.origin === "worker" && row.workerId) await session.send(row.workerId, `[Answer ${row.id}] ${args.text}`, "reply", `supermesh:answer:${row.id}`);
+		await db.inbox.answerScoped(args.askId, args.text, scope, (/* @__PURE__ */ new Date()).toISOString());
 		return JSON.stringify({
 			id: args.askId,
 			status: "done",
-			delivery: row.origin === "worker" ? "direct" : "queued"
+			delivery: "queued"
 		});
 	}
 });
@@ -3159,11 +3466,19 @@ const create_supervisor = defineTool({
 			title: args.title
 		});
 		await db.supervisor.attachSession(id, sessionId);
-		await session.send(sessionId, JSON.stringify({
+		await db.inbox.enqueue({
+			type: "supervisor",
+			supervisorId: id,
+			origin: "main",
+			kind: "notice",
 			title: args.title,
-			reason: args.reason,
-			tickets
-		}), "queue");
+			message: JSON.stringify({
+				title: args.title,
+				reason: args.reason,
+				tickets
+			})
+		});
+		await inbox.notify(await session.activate(sessionId));
 		return JSON.stringify({
 			id,
 			sessionId,
@@ -3420,6 +3735,7 @@ const attach_thread_to_ticket = defineTool({
 			linked: true,
 			existing: true
 		});
+		if (thread.kind === "pull" && thread.url && !ticket.prUrl) await db.ticket.save(ticket.id, { prUrl: thread.url });
 		await db.inbox.enqueue({
 			type: "project",
 			projectId: ticket.projectId,
@@ -3487,7 +3803,7 @@ const unlink_thread = defineTool({
 // src/ai/orchestrator/tools/ticket.ts
 const create_ticket$1 = defineTool({
 	name: "create_ticket",
-	description: "开一张票。任务一旦存在，projectId 就必须确定。",
+	description: "开一张票。任务一旦存在，projectId 就必须确定。没 @ bot 的触发只是 inferred 候选，inferred 模式不是 auto 时会被拒绝；strength 为 self（你自己开的 issue）不是 inferred，不受这条限制。",
 	parameters: {
 		title: {
 			type: "string",
@@ -3508,6 +3824,10 @@ const create_ticket$1 = defineTool({
 		description: {
 			type: "string",
 			description: "需求正文，没有就省略。"
+		},
+		triggerId: {
+			type: "string",
+			description: "引起这张票的触发，取邮件里的 triggerId。省略时按 threadIds 里最新的一条触发判准入强度。"
 		}
 	},
 	output: {
@@ -3524,6 +3844,8 @@ const create_ticket$1 = defineTool({
 		const identity = await session.resolve(exec.agent?.session.id ?? "");
 		if (!identity) throw new Error("当前会话没有 Supermesh 身份");
 		if (identity.role !== "main") throw new Error("仅主编排可调用");
+		const admission = await latestTriggerStrength(args.threadIds, args.triggerId);
+		if (admission && !ticketAllowed(admission.strength, (await setting.load()).inferred)) throw new Error(`触发 ${admission.triggerId} 没有 @ bot，只是 inferred 候选，当前 inferred 模式不是 auto：只能做分诊记录，不能建票。要开工请让人 @ bot 一次，或在设置里把 inferred 改成 auto。你自己开的 issue 强度是 self，不走这条限制。`);
 		return JSON.stringify(await db.ticket.createWithThreads(args.projectId, args.title, args.threadIds, args.description));
 	}
 });
@@ -3534,11 +3856,12 @@ const list_ticket$1 = defineTool({
 		status: {
 			type: "string",
 			enum: [
-				"waiting",
 				"queued",
 				"running",
+				"idle",
 				"review",
 				"done",
+				"completed",
 				"cancelled"
 			],
 			description: "只看某个状态；省略表示不含已终态的票。"
@@ -3603,7 +3926,7 @@ const orchestrator = definePreset({
 		skillFilesystem,
 		timeContext,
 		toolBash,
-		toolExecutorPtc,
+		toolRegistryPtc,
 		toolFs,
 		toolFsSearch,
 		toolJobs,
@@ -3885,7 +4208,7 @@ const supervisor = definePreset({
 		skillFilesystem,
 		timeContext,
 		toolBash,
-		toolExecutorPtc,
+		toolRegistryPtc,
 		toolFs,
 		toolFsSearch,
 		toolJobs,
@@ -3910,7 +4233,7 @@ const report = defineTool({
 				"dropped"
 			],
 			required: true,
-			description: "progress 在跑 / ready 干完了（PR 已开）/ failed 失败了 / dropped 不用做了。「我在等答复」不占状态位。"
+			description: "progress 在跑 / ready 干完了（有 PR 就进 review，没有就正常完成）/ failed 失败了 / dropped 不用做了。「我在等答复」不占状态位。"
 		},
 		summary: {
 			type: "string",
@@ -3921,7 +4244,7 @@ const report = defineTool({
 	output: {
 		schema: {
 			type: "string",
-			description: "是否已投递。"
+			description: "是否已记录。"
 		},
 		render: (_args, value) => [{
 			type: "text",
@@ -3934,7 +4257,11 @@ const report = defineTool({
 		if (identity.role !== "worker" || !identity.workerId || !identity.ticketId) throw new Error("仅 Worker 可调用");
 		const worker = await db.worker.findById(identity.workerId);
 		if (!worker || worker.status === "ended") throw new Error("Worker 已结束");
-		return JSON.stringify(await db.worker.reportProgress(worker.id, args.state, args.summary));
+		await db.worker.reportProgress(worker.id, args.state, args.summary);
+		return JSON.stringify({
+			recorded: true,
+			state: args.state
+		});
 	}
 });
 const ask = defineTool({
@@ -3996,7 +4323,7 @@ const agents = {
 			skillFilesystem,
 			timeContext,
 			toolBash,
-			toolExecutorPtc,
+			toolRegistryPtc,
 			toolFs,
 			toolFsSearch,
 			toolJobs,
@@ -4022,10 +4349,345 @@ async function handleAgentCreated(ctx, agent) {
 	ctx.effect(() => agent.ctx.on("agent/status", ({ status }) => {
 		if (status === "idle") inbox.notify(agent).catch((error) => ctx.logger.error(error));
 	}), "supermesh:mailbox-notice");
-	await inbox.notify(agent, true);
+	await inbox.notify(agent);
+}
+// src/service/forge.evidence.ts
+/** 只有这两个工具会把命令交给 shell，证据也只从它们的调用与结果里取。 */
+const SHELL_TOOLS = /* @__PURE__ */ new Set(["bash", "pwsh"]);
+const CREATE = /\b(?:glab(?:-\w+)?\s+mr\s+(?:create|new)|gh(?:-\w+)?\s+pr\s+(?:create|new))\b/;
+const PUSH = /\bgit(?:\s+(?:-[Cc]\s+\S+|--[\w-]+(?:=\S+)?))*\s+push\b/;
+const TARGET = /^To (\S+)$/;
+const REF = /^ [ +*=] (\[[^\]]+\]|\S+) +\S+ -> (\S+)(?: \(.*\))?$/;
+const CHANGE_REQUEST_URL = /\bhttps?:\/\/[^\s"'<>]+?\/(?:merge_requests|pull)\/\d+(?![\w-])/g;
+/**
+* 读 `git push` 输出里被推上去的分支。每条引用行归属最近一条 `To <remote>`，
+* 被拒绝、被删除的引用和新标签不算 —— 它们不会开出变更请求。
+*/
+function pushedBranches(text) {
+	const pushed = [];
+	let remote;
+	for (const line of text.split(/\r?\n/)) {
+		const target = TARGET.exec(line);
+		if (target) {
+			remote = target[1];
+			continue;
+		}
+		const ref = REF.exec(line);
+		if (!remote || !ref) continue;
+		const [, summary = "", destination = ""] = ref;
+		if (summary === "[new tag]") continue;
+		const branch = destination.startsWith("refs/heads/") ? destination.slice(11) : destination;
+		if (branch.startsWith("refs/")) continue;
+		if (!pushed.some((entry) => entry.remote === remote && entry.branch === branch)) pushed.push({
+			remote,
+			branch
+		});
+	}
+	return pushed;
+}
+/** 取命令输出里的变更请求地址，保持首次出现的顺序。 */
+function changeRequestUrls(text) {
+	return [...new Set(text.match(CHANGE_REQUEST_URL) ?? [])];
+}
+/**
+* 从会话日志里取属于这个仓库的 GitHub 证据：`gh pr create` 打印的 PR 地址，
+* 以及推到这个仓库的分支。官方 forge-session 投影只认 `tool/call` 里的
+* `bash` / `pwsh`，Worker 在程序模式下用 `run_code` 调 shell 时它一条都看不到，
+* 所以 GitHub 与 GitLab 共用同一份 shell 证据。
+*
+* @param events - Worker 会话的完整事件。
+* @param repository - 项目仓库全名，小写 `owner/name`。
+*/
+function githubEvidence(events, repository) {
+	const evidence = shellEvidence(events);
+	const pushed = evidence.branches.flatMap((entry) => {
+		const remote = resource$1.of(entry.remote);
+		return remote === null ? [] : [{
+			entry,
+			remote
+		}];
+	});
+	return {
+		urls: evidence.urls.filter((url) => pullRepositoryOf(url) === repository),
+		branches: pushed.filter((item) => item.remote === repository).map((item) => item.entry),
+		forks: pushed.filter((item) => item.remote !== repository).map((item) => item.entry)
+	};
+}
+function pullRepositoryOf(url) {
+	try {
+		const target = resource$1.parse(url);
+		return target.kind === "pull" ? target.repository : null;
+	} catch {
+		return null;
+	}
+}
+/**
+* 从会话日志里取 Worker 自己留下的开单证据：`glab mr create` / `gh pr create`
+* 打印的地址，以及 `git push` 推上去的分支。只认工具调用本身成功的结果。
+*
+* 两种调用形态都要认，Worker 换模式时不能丢绑定：
+* - 标准模式：模型直接调 `pwsh` / `bash`，命令在 `tool/call` 里；
+* - 程序模式：模型在 `run_code` 里调 `tools.pwsh(...)`，命令在 `tool/ptc-dispatch` 里。
+*/
+function shellEvidence(events) {
+	const pending = /* @__PURE__ */ new Map();
+	const urls = [];
+	const branches = [];
+	for (const event of events) {
+		if (event.type === "turn/end") {
+			pending.clear();
+			continue;
+		}
+		const call = shellCall(event);
+		if (call) {
+			if (!SHELL_TOOLS.has(call.name)) continue;
+			const creates = CREATE.test(call.command);
+			const pushes = PUSH.test(call.command);
+			if (!creates && !pushes) continue;
+			const previous = pending.get(call.key);
+			pending.set(call.key, {
+				urls: creates || Boolean(previous?.urls),
+				pushes: pushes || Boolean(previous?.pushes)
+			});
+			continue;
+		}
+		if (event.type !== "tool/result") continue;
+		const { message } = event.data;
+		const evidence = pending.get(message.toolCallId);
+		if (!evidence) continue;
+		pending.delete(message.toolCallId);
+		if (message.isError === true) continue;
+		const text = message.content.flatMap((block) => block.type === "text" ? [block.text] : []).join("\n");
+		if (evidence.urls) urls.push(...changeRequestUrls(text));
+		if (evidence.pushes) branches.push(...pushedBranches(text));
+	}
+	return {
+		urls: [...new Set(urls)],
+		branches: branches.filter((entry, index) => branches.findIndex((other) => other.remote === entry.remote && other.branch === entry.branch) === index)
+	};
+}
+/** 直接调用的 shell 工具（标准模式）与 run_code 里程序化调用的同一个工具（程序模式）都算一次 shell 调用。 */
+function shellCall(event) {
+	if (event.type === "tool/call") {
+		const command = commandOf(event.data.arguments);
+		return command === void 0 ? null : {
+			key: event.data.callId,
+			name: event.data.name,
+			command
+		};
+	}
+	if (event.type === "tool/ptc-dispatch") {
+		const command = commandOf(event.data.arguments);
+		return command === void 0 ? null : {
+			key: event.data.rootCallId,
+			name: event.data.name,
+			command
+		};
+	}
+	return null;
+}
+function commandOf(raw) {
+	let parsed = raw;
+	if (typeof raw === "string") try {
+		parsed = JSON.parse(raw);
+	} catch {
+		return;
+	}
+	if (typeof parsed !== "object" || parsed === null) return void 0;
+	const command = parsed.command;
+	return typeof command === "string" ? command : void 0;
+}
+// src/service/forge.ts
+/** 已经补挂过的票：同一个运行时里不重复读会话日志。 */
+const reconciled = /* @__PURE__ */ new Set();
+/** 确认过不是 Worker 的会话：主编排、项目编排的每条工具结果都查一次库没有意义。 */
+const outsiders = /* @__PURE__ */ new Set();
+const forge = defineService({
+	/**
+	* Worker 会话里出现开单证据时把变更请求挂到票上。
+	* 分支名是模型的自由发挥，不能当唯一依据；这里读的是会话自己的 shell 结果。
+	*/
+	async observe(source, event) {
+		if (event.type !== "tool/result" && event.type !== "turn/end") return;
+		if (outsiders.has(source.id)) return;
+		try {
+			const worker = await db.worker.findById(source.id);
+			if (!worker) {
+				outsiders.add(source.id);
+				return;
+			}
+			const ticket = await db.ticket.findById(worker.ticketId);
+			if (!ticket || ticket.prUrl || [
+				"done",
+				"completed",
+				"cancelled"
+			].includes(ticket.status)) return;
+			const project = await db.project.findById(ticket.projectId);
+			if (!project?.enabled) return;
+			reconciled.add(ticket.id);
+			await attach(ticket, await evidenceOf(source, project, ticket, event.type === "turn/end", true));
+		} catch (error) {
+			getServerContext(server).logger.warn("supermesh: forge binding failed for %s: %s", source.id, error instanceof Error ? error.message : String(error));
+		}
+	},
+	/** 补挂历史票：Worker 早就开过 PR，但当时没挂上。每个运行时每张票只补一次。 */
+	async reconcile() {
+		for (const ticket of await db.ticket.listOpen()) {
+			if (ticket.prUrl || reconciled.has(ticket.id)) continue;
+			if (ticket.status !== "idle" && ticket.status !== "review") continue;
+			reconciled.add(ticket.id);
+			const worker = (await db.worker.listByTicket(ticket.id)).at(-1);
+			const project = await db.project.findById(ticket.projectId);
+			if (!worker || !project?.enabled) continue;
+			const source = await session.instance(worker.id);
+			if (!source) continue;
+			try {
+				await attach(ticket, await evidenceOf(source, project, ticket, true, false));
+			} catch (error) {
+				getServerContext(server).logger.warn("supermesh: forge backfill failed for %s: %s", ticket.id, error instanceof Error ? error.message : String(error));
+			}
+		}
+	}
+});
+/** 回合结束才回读整份会话日志；只有活着的会话才值得让官方按分支反查。 */
+async function evidenceOf(source, project, ticket, settled, live) {
+	if (ticket.channelId === "github") return githubUrls(source, project, settled, live);
+	if (ticket.channelId === "gitlab" && settled) return gitlabUrls(source, project);
+	return [];
+}
+/**
+* GitHub 走官方 forge-session：绑定来自会话自己的 `gh pr create`、`gh pr view` 等
+* 命令结果，以及推送后按分支反查到的打开状态 PR。官方投影只认 `tool/call` 里的
+* `bash` / `pwsh`，Worker 在程序模式下用 `run_code` 调 shell 时它看不到，
+* 所以再叠一份会话自己的 shell 证据；官方绑定在前，仍是权威来源。
+*/
+async function githubUrls(source, project, settled, live) {
+	const service = getServerContext(server).forgeSession;
+	const repository = project.remoteUrl ? resource$1.of(project.remoteUrl) : null;
+	const evidence = settled && repository ? githubEvidence((await session.history(source.id)).events, repository) : {
+		urls: [],
+		branches: [],
+		forks: []
+	};
+	if (live && service) for (const entry of evidence.branches) await service.discoverBranch(source, entry.remote, entry.branch);
+	const official = service ? service.changeRequests(source).map((entry) => entry.url).filter((url) => githubRepositoryOf(url) === repository) : [];
+	const urls = [.../* @__PURE__ */ new Set([...official, ...evidence.urls])];
+	if (urls.length || !repository) return urls;
+	for (const entry of [...evidence.branches, ...evidence.forks]) {
+		const head = resource$1.of(entry.remote);
+		if (!head) continue;
+		for (const url of await openPullRequests(repository, head.split("/")[0], entry.branch).catch(() => [])) if (!urls.includes(url)) urls.push(url);
+	}
+	return urls;
+}
+/** 按 head 分支查这个仓库里打开的 PR：push 之后没走 create 命令时，绑定只能靠这一步。 */
+async function openPullRequests(repository, owner, branch) {
+	const rows = await github.pages(`repos/${repository}/pulls?state=open&head=${encodeURIComponent(`${owner}:${branch}`)}`);
+	const urls = [];
+	for (const row of rows) {
+		if (text(row.state) !== "open" || text(record(row.head).ref) !== branch) continue;
+		const url = text(row.html_url);
+		if (githubRepositoryOf(url) === repository && !urls.includes(url)) urls.push(url);
+	}
+	return urls;
+}
+function githubRepositoryOf(url) {
+	try {
+		return resource$1.parse(url).repository;
+	} catch {
+		return null;
+	}
+}
+/**
+* GitLab 没有官方 provider，按同一套证据自己做：`glab mr create` 打印的地址，
+* 以及 `git push` 之后按源分支反查到的打开状态 MR。
+*/
+async function gitlabUrls(source, project) {
+	const site = await gitlab.site();
+	const scope = await gitlab.scopeOf(project).catch(() => null);
+	if (!scope) return [];
+	const { events } = await session.history(source.id);
+	const evidence = shellEvidence(events);
+	const urls = evidence.urls.filter((url) => gitlabScopeOf(url, site) === scope);
+	const branches = new Set(evidence.branches.map((entry) => entry.branch));
+	for (const name of branches) for (const url of await openMergeRequests(site, scope, name)) if (!urls.includes(url)) urls.push(url);
+	return urls;
+}
+function gitlabScopeOf(url, site) {
+	try {
+		return resource.source(resource.parse(url, site));
+	} catch {
+		return null;
+	}
+}
+async function openMergeRequests(site, scope, branch) {
+	const repository = scope.slice(site.length + 1);
+	if (!repository) return [];
+	const { rows } = await gitlab.pages(site, `projects/${encodeURIComponent(repository)}/merge_requests?state=opened&source_branch=${encodeURIComponent(branch)}`);
+	const urls = [];
+	for (const row of rows) {
+		if (row.state !== "opened" || row.source_branch !== branch || typeof row.web_url !== "string") continue;
+		if (gitlabScopeOf(row.web_url, site) === scope) urls.push(row.web_url);
+	}
+	return urls;
+}
+/** 挂票并订阅 PR 话题：采集只轮询有票订阅的 PR，不建这条链接就永远等不到状态与结单。 */
+async function attach(ticket, urls) {
+	for (const url of urls) {
+		const current = await db.ticket.findById(ticket.id);
+		if (!current || current.prUrl) return;
+		const threadId = await ensureThread(current, url);
+		if (!threadId) continue;
+		await db.ticketThread.link(current.id, threadId, now());
+		await db.ticket.save(current.id, { prUrl: url });
+	}
+}
+async function ensureThread(ticket, url) {
+	if (ticket.channelId === "github") {
+		const target = resource$1.parse(url);
+		const refId = `${target.repository}:${target.number}`;
+		const existing = await db.thread.findByRef("github", refId);
+		if (existing) return existing.id;
+		const at = now();
+		return (await db.thread.record({
+			id: `github:${refId}`,
+			channelId: "github",
+			refId,
+			kind: "pull",
+			title: `PR #${target.number}`,
+			url: `https://github.com/${target.repository}/pull/${target.number}`,
+			createdAt: at,
+			updatedAt: at,
+			projectId: ticket.projectId,
+			triage: "claimed",
+			triagedAt: at
+		})).id;
+	}
+	if (ticket.channelId === "gitlab") {
+		const target = resource.parse(url, await gitlab.site());
+		const refId = `${resource.source(target)}:${target.kind}:${target.number}`;
+		const existing = await db.thread.findByRef("gitlab", refId);
+		if (existing) return existing.id;
+		const at = now();
+		return (await db.thread.record({
+			id: `gitlab:${refId}`,
+			channelId: "gitlab",
+			refId,
+			kind: "pull",
+			title: `MR !${target.number}`,
+			url: resource.url(target),
+			createdAt: at,
+			updatedAt: at,
+			projectId: ticket.projectId,
+			triage: "claimed",
+			triagedAt: at
+		})).id;
+	}
+	return null;
 }
 // src/events/session-event.ts
 async function handleSessionEvent(source, event) {
+	await forge.observe(source, event);
 	await worker$1.observe(source, event);
 }
 // src/runtime/scheduler.ts
@@ -4278,7 +4940,7 @@ var JsonSchedulerImpl = class {
 		await mkdir(dirname(this.filePath), { recursive: true });
 		const tmp = `${this.filePath}.${process.pid}.tmp`;
 		await writeFile(tmp, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-		await rename$1(tmp, this.filePath);
+		await rename(tmp, this.filePath);
 	}
 	async load() {
 		let raw;
@@ -4344,7 +5006,11 @@ const runtime = defineService({ start() {
 async function closeFinishedSupervisors() {
 	for (const supervisor of await db.supervisor.listActive()) {
 		const tickets = await Promise.all((await db.supervisorTicket.listBySupervisor(supervisor.id)).map((link) => db.ticket.findById(link.ticketId)));
-		if (!tickets.length || tickets.some((ticket) => !ticket || ticket.status !== "done" && ticket.status !== "cancelled")) continue;
+		if (!tickets.length || tickets.some((ticket) => !ticket || ![
+			"done",
+			"completed",
+			"cancelled"
+		].includes(ticket.status))) continue;
 		if ((await db.inbox.listPending("supervisor", null)).some((message) => message.supervisorId === supervisor.id)) continue;
 		await db.supervisor.close(supervisor.id, (/* @__PURE__ */ new Date()).toISOString());
 		if (supervisor.sessionId) {
@@ -4396,6 +5062,7 @@ async function activate() {
 			await inbox.deliverAnswers();
 			await inbox.deliver();
 			await worker$1.reconcile();
+			await forge.reconcile();
 			await closeFinishedSupervisors();
 		})));
 		unregister.push(scheduler.use({
@@ -4463,7 +5130,8 @@ const inject = [
 	"credentials",
 	"connection",
 	"webServer",
-	"worktrees"
+	"worktrees",
+	"forgeSession"
 ];
 async function apply(ctx) {
 	await ctx.effect(async function* () {

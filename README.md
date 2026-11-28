@@ -31,7 +31,7 @@ DSH 多代理任务编排：把 GitHub / GitLab 的 issue、PR 与评论变成�
 dsh plugin --profile <name> add github:omdsh-dev/dsh-supermesh
 ```
 
-需要 DSH `0.2.2-rc.2`。本地开发用 `pnpm run dev:dsh`，默认 `supermesh-dev` profile 与 `3091` 端口。
+需要 DSH `0.2.3-alpha.3`。本地开发用 `pnpm run dev:dsh`，默认 `supermesh-dev` profile 与 `3091` 端口。
 
 ## ✨ 特性
 

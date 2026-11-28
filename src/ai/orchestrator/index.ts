@@ -49,7 +49,7 @@ export const orchestrator = definePreset({
     plugins.skillFilesystem,
     plugins.timeContext,
     plugins.toolBash,
-    plugins.toolExecutorPtc,
+    plugins.toolRegistryPtc,
     plugins.toolFs,
     plugins.toolFsSearch,
     plugins.toolJobs,
